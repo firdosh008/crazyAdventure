@@ -25,13 +25,13 @@ router.post("/book", (req, res) => {
   }
 
   const query = `
-    INSERT INTO bookings2 (name, email, phone_number, country_code, age, trek_date, number_of_people, trekname, price) 
+    INSERT INTO bookings (name, email, phone_number, country_code, age, trek_date, number_of_people, trekname, price) 
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   db.query(query, [name, email, phoneNumber, countryCode, age, trekDate, numberOfPeople, Trekname, totalPrice], (error, results) => {
     if (error) {
-      console.error("Error saving booking:", error);
-      return res.status(500).json({ message: "Failed to save booking" });
+      console.error("Error saving bookings:", error);
+      return res.status(500).json({ message: "Failed to save bookings" });
     }
     res.status(201).json({ message: "Booking saved successfully", bookingId: results.insertId });
   });
@@ -39,7 +39,7 @@ router.post("/book", (req, res) => {
 
 // 2. API to Fetch All Bookings
 router.get("/bookings", (req, res) => {
-  const query = "SELECT * FROM bookings2 ORDER BY booking_date DESC";
+  const query = "SELECT * FROM bookings ORDER BY booking_date DESC";
   db.query(query, (error, results) => {
     if (error) {
       console.error("Error fetching bookings:", error);
@@ -53,11 +53,11 @@ router.get("/bookings", (req, res) => {
 router.delete("/bookings/:id", (req, res) => {
   const { id } = req.params;
 
-  const query = "DELETE FROM bookings2 WHERE id = ?";
+  const query = "DELETE FROM bookings WHERE id = ?";
   db.query(query, [id], (error, results) => {
     if (error) {
-      console.error("Error deleting booking:", error);
-      return res.status(500).json({ message: "Failed to delete booking" });
+      console.error("Error deleting bookings:", error);
+      return res.status(500).json({ message: "Failed to delete bookings" });
     }
 
     if (results.affectedRows === 0) {

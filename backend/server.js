@@ -17,14 +17,6 @@ import popularTourRoutes from "./routes/most_popular_tour.js";
 import heroSectionRoutes from "./routes/hero_section.js";
 import topSpotsRoutes from "./routes/topspots.js";
 
-
-
-
-
-
-
-
-
 dotenv.config();
 const app = express();
 
@@ -34,7 +26,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Add these lines to increase the upload size limit
-app.use(express.json({ limit: "100mb" })); 
+app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 // Add booking routes
@@ -55,7 +47,6 @@ app.use("/api/hero_section", heroSectionRoutes);
 //Routes for topspots
 app.use("/api/top_spots", topSpotsRoutes);
 
-//winter tour routes
 // Multer configuration for handling image uploads
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -122,8 +113,6 @@ app.delete("/api/slider_images/:id", (req, res) => {
   });
 });
 
-
-
 app.get("/api/tour", (req, res) => {
   const query = "SELECT * FROM tour"; // Adjust based on your table name
   db.query(query, (err, results) => {
@@ -138,10 +127,6 @@ app.get("/api/tour", (req, res) => {
 app.post("/api/tour/upload", upload.single("image"), (req, res) => {
   const { image_name, price, days, rating, location, listing, category } = req.body;
   const image = req.file ? `/uploads/${req.file.filename}` : null;
-
-  if (!image_name || !price || !days || !rating || !location || !listing || !category || !image) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
 
   const query = `
     INSERT INTO tour (image_name, image, rating, price, days, location, listing, category)
@@ -175,6 +160,34 @@ app.delete("/api/tour/:id", (req, res) => {
     }
     res.json({ message: "Tour deleted successfully" });
   });
+});
+
+// New API for updating a tour (add this route)
+app.put("/api/tour/update/:id", upload.single("image"), (req, res) => {
+  const { id } = req.params;
+  const { image_name, price, days, rating, location, listing, category } = req.body;
+  const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+  const query = `
+    UPDATE tour
+    SET image_name = ?, image = ?, rating = ?, price = ?, days = ?, location = ?, listing = ?, category = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    query,
+    [image_name, image, rating, price, days, location, listing, category, id],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating tour:", err);
+        return res.status(500).json({ message: "Failed to update tour" });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Tour not found" });
+      }
+      res.json({ message: "Tour updated successfully" });
+    }
+  );
 });
 
 // Add session middleware for Google OAuth
@@ -217,9 +230,6 @@ app.get("/api/auth/logout", (req, res) => {
     res.json({ message: "Logged out successfully" });
   });
 });
-
-
-
 
 // Start the server
 const PORT = 5000;

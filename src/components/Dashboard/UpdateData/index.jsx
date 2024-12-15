@@ -1,168 +1,214 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Table, Button, Upload, message, Space, Input, Row, Col } from "antd";
-import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Table, Typography, Button, Popconfirm, Space, Upload, Input, Select, message, Modal, Form } from "antd";
+import { DeleteOutlined, UploadOutlined, EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-const UpdateData = () => {
-    const [images, setImages] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [trekName, setTrekName] = useState(""); // State to store the trek name
-    const [price, setPrice] = useState(""); // State to store the price
-    const [duration, setDuration] = useState(""); // State to store trek duration
-    const [rating, setRating] = useState(""); // State to store rating
-    const [location, setLocation] = useState(""); // State to store location
-    const [listing, setListing] = useState(""); // State to store listing info
-    const [category, setCategory] = useState(""); // State to store category
-    const [file, setFile] = useState(null);
+const { Option } = Select;
 
-    // Fetch all tour data
-    const fetchImages = () => {
+function UpdateData() {
+    const [loading, setLoading] = useState(false);
+    const [dataSource, setDataSource] = useState([]);
+    const [formData, setFormData] = useState({
+        name: "",
+        price: "",
+        days: "",
+        rating: "",
+        location: "",
+        listing: "",
+        category: "",
+    });
+    const [imageFile, setImageFile] = useState(null);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [currentEditId, setCurrentEditId] = useState(null);
+    const [editForm] = Form.useForm();
+
+    // Fetch Trek Data
+    const fetchTrekData = () => {
         setLoading(true);
         axios
             .get("http://localhost:5000/api/tour")
             .then((response) => {
-                console.log("Fetched tours:", response.data);
-                setImages(response.data);
+                setDataSource(response.data);
+                setLoading(false);
             })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-                message.error("Failed to fetch trekking details.");
-            })
-            .finally(() => setLoading(false));
+            .catch(() => {
+                message.error("Failed to fetch trek data.");
+                setLoading(false);
+            });
     };
 
     useEffect(() => {
-        fetchImages();
+        fetchTrekData();
     }, []);
 
     // Handle Upload
     const handleUpload = () => {
-        if (!file || !trekName || !price || !duration || !rating || !location || !listing || !category) {
+        const { name, price, days, rating, location, listing, category } = formData;
+        if (!name || !price || !days || !rating || !location || !listing || !category || !imageFile) {
             message.warning("Please provide all the required details.");
             return;
         }
 
-        const formData = new FormData();
-        formData.append("image", file);
-        formData.append("image_name", trekName);
-        formData.append("price", price);
-        formData.append("days", duration);
-        formData.append("rating", rating);
-        formData.append("location", location);
-        formData.append("listing", listing);
-        formData.append("category", category);
+        const uploadData = new FormData();
+        uploadData.append("name", name);
+        uploadData.append("price", price);
+        uploadData.append("days", days);
+        uploadData.append("rating", rating);
+        uploadData.append("location", location);
+        uploadData.append("listing", listing);
+        uploadData.append("category", category);
+        uploadData.append("image", imageFile);
 
-        setLoading(true);
         axios
-            .post("http://localhost:5000/api/tour/upload", formData) // Upload to the 'tour' table
+            .post("http://localhost:5000/api/tour/upload", uploadData)
             .then(() => {
                 message.success("Trek uploaded successfully!");
-                fetchImages(); // Refresh the list
-                setTrekName("");
-                setPrice("");
-                setDuration("");
-                setRating("");
-                setLocation("");
-                setListing("");
-                setCategory("");
-                setFile(null);
+                fetchTrekData();
+                setFormData({
+                    name: "",
+                    price: "",
+                    days: "",
+                    rating: "",
+                    location: "",
+                    listing: "",
+                    category: "",
+                });
+                setImageFile(null);
             })
-            .catch((error) => {
-                console.error("Upload failed:", error);
-                message.error("Failed to upload trek details.");
-            })
-            .finally(() => setLoading(false));
+            .catch(() => message.error("Failed to upload trek."));
     };
 
     // Handle Delete
     const handleDelete = (id) => {
-        setLoading(true);
         axios
-            .delete(`http://localhost:5000/api/tour/${id}`) // Delete from the 'tour' table
+            .delete(`http://localhost:5000/api/tour/${id}`)
             .then(() => {
                 message.success("Trek deleted successfully!");
-                fetchImages();
+                setDataSource((prev) => prev.filter((item) => item.id !== id));
             })
-            .catch((error) => {
-                console.error("Delete failed:", error);
-                message.error("Failed to delete trek.");
-            })
-            .finally(() => setLoading(false));
+            .catch(() => message.error("Failed to delete the trek."));
     };
 
-    // Columns for the Table
+    // Handle Edit
+    const handleEdit = (record) => {
+        setCurrentEditId(record.id);
+        setEditModalVisible(true);
+        editForm.setFieldsValue({
+            name: record.image_name,
+            price: record.price,
+            days: record.days,
+            rating: record.rating,
+            location: record.location,
+            listing: record.listing,
+            category: record.category,
+        });
+    };
+
+    const handleEditSubmit = () => {
+        editForm.validateFields().then((values) => {
+            const updateData = new FormData();
+            updateData.append("name", values.name);
+            updateData.append("price", values.price);
+            updateData.append("days", values.days);
+            updateData.append("rating", values.rating);
+            updateData.append("location", values.location);
+            updateData.append("listing", values.listing);
+            updateData.append("category", values.category);
+            if (imageFile) updateData.append("image", imageFile);
+
+            axios
+                .put(`http://localhost:5000/api/tour/update/${currentEditId}`, updateData)
+                .then(() => {
+                    message.success("Trek updated successfully!");
+                    setEditModalVisible(false);
+                    setImageFile(null);
+                    fetchTrekData();
+                })
+                .catch(() => message.error("Failed to update the trek."));
+        });
+    };
+
+    // Table Columns
     const columns = [
         {
             title: "Trek Name",
             dataIndex: "image_name",
             key: "image_name",
-            render: (text) => (text ? text : "-"),
-        },
-        {
-            title: "Rating",
-            dataIndex: "rating",
-            key: "rating",
-            render: (rating) => (rating ? `${rating} ★` : "-"),
+            render: (text) => text || "-",
         },
         {
             title: "Price",
             dataIndex: "price",
             key: "price",
-            render: (price) => (price ? `₹${price}/Person` : "-"),
+            render: (price) => price ? `₹${price}` : "-",
         },
         {
             title: "Duration",
             dataIndex: "days",
             key: "days",
-            render: (days) => (days ? `${days} Days` : "-"),
+            render: (days) => days ? `${days} Days` : "-",
+        },
+        {
+            title: "Rating",
+            dataIndex: "rating",
+            key: "rating",
+            render: (rating) => rating ? `${rating} ★` : "-",
         },
         {
             title: "Location",
             dataIndex: "location",
             key: "location",
-            render: (location) => (location ? location : "-"),
-        },
-        {
-            title: "Listing",
-            dataIndex: "listing",
-            key: "listing",
-            render: (listing) => (listing ? listing : "-"),
+            render: (location) => location || "-",
         },
         {
             title: "Category",
             dataIndex: "category",
             key: "category",
-            render: (category) => (category ? category : "-"),
+            render: (category) => category || "-",
         },
         {
-            title: "Preview",
+            title: "Image",
             dataIndex: "image",
             key: "image",
-            render: (image) => (
-                <img
-                    src={image}
-                    alt="Uploaded Trek"
-                    style={{ width: "80px", borderRadius: "5px" }}
-                />
+            render: (imageUrl) => (
+                imageUrl ? (
+                    <img
+                        src={`${imageUrl}`}
+                        alt="Trek"
+                        style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                    />
+                ) : (
+                    "-"
+                )
             ),
         },
         {
-            title: "Actions",
-            key: "actions",
+            title: "Action",
+            key: "action",
             render: (_, record) => (
                 <Space>
                     <Button
                         type="primary"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDelete(record.id)}
+                        icon={<EditOutlined />}
+                        onClick={() => handleEdit(record)}
                     >
-                        Delete
+                        Edit
                     </Button>
+                    <Popconfirm
+                        title="Are you sure to delete this trek?"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button danger icon={<DeleteOutlined />}>
+                            Delete
+                        </Button>
+                    </Popconfirm>
                 </Space>
             ),
         },
     ];
+
 
     return (
         <div
@@ -171,105 +217,116 @@ const UpdateData = () => {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "10px",
+                padding: "20px",
             }}
         >
-            {/* Header */}
             <Typography.Title level={2}>Upload Trekking Packages</Typography.Title>
 
             {/* Upload Form */}
-            <Space style={{ marginBottom: "20px", width:"100%", display: "flex", flexDirection: "column" }}>
-                <Row style={{ marginBottom: "10px" }}>
-                    <Col span={12}>
-                        <Input
-                            placeholder="Enter trek name"
-                            value={trekName}
-                            onChange={(e) => setTrekName(e.target.value)}
-                            size="medium"
-                        />
-                    </Col>
-                    <Col span={12}>
-                        <Input
-                            placeholder="Enter price"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            size="medium"
-                        />
-                    </Col>
-                </Row>
-                <Row style={{ marginBottom: "10px" }}>
-                    <Col span={12}>
-                        <Input
-                            placeholder="Enter duration (in days)"
-                            value={duration}
-                            onChange={(e) => setDuration(e.target.value)}
-                            size="medium"
-                        />
-                    </Col>
-                    <Col span={12}>
-                        <Input
-                            placeholder="Enter rating"
-                            value={rating}
-                            onChange={(e) => setRating(e.target.value)}
-                            size="medium"
-                        />
-                    </Col>
-                </Row>
-                <Row style={{ marginBottom: "10px" }}>
-                    <Col span={12}>
-                        <Input
-                            placeholder="Enter location"
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            size="medium"
-                        />
-                    </Col>
-                    <Col span={12}>
-                        <Input
-                            placeholder="Enter listing"
-                            value={listing}
-                            onChange={(e) => setListing(e.target.value)}
-                            size="medium"
-                        />
-                    </Col>
-                </Row>
-                <Row style={{ marginBottom: "10px" }}>
-                    <Col span={12}>
-                        <Input
-                            placeholder="Enter category"
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            size="medium"
-                        />
-                    </Col>
-                    <Col span={12}>
-                        <Upload
-                            beforeUpload={(file) => {
-                                setFile(file);
-                                return false;
-                            }}
-                            maxCount={1}
-                            accept="image/*"
-                        >
-                            <Button icon={<UploadOutlined />}>Choose Image</Button>
-                        </Upload>
-                    </Col>
-                </Row>
+            <Space style={{ marginBottom: "20px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                <Input
+                    placeholder="Enter trek name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    style={{ width: "200px" }}
+                />
+                <Input
+                    placeholder="Enter price"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    style={{ width: "200px" }}
+                />
+                <Input
+                    placeholder="Enter duration"
+                    value={formData.days}
+                    onChange={(e) => setFormData({ ...formData, days: e.target.value })}
+                    style={{ width: "200px" }}
+                />
+                <Select
+                    placeholder="Select Rating"
+                    value={formData.rating}
+                    onChange={(value) => setFormData({ ...formData, rating: value })}
+                    style={{ width: "200px" }}
+                >
+                    <Option value={1}>1 ★</Option>
+                    <Option value={2}>2 ★</Option>
+                    <Option value={3}>3 ★</Option>
+                    <Option value={4}>4 ★</Option>
+                    <Option value={5}>5 ★</Option>
+                </Select>
+                <Input
+                    placeholder="Enter location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    style={{ width: "200px" }}
+                />
+                <Input
+                    placeholder="Enter category"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    style={{ width: "200px" }}
+                />
+                <Upload
+                    beforeUpload={(file) => {
+                        setImageFile(file);
+                        return false;
+                    }}
+                    maxCount={1}
+                    accept="image/*"
+                >
+                    <Button icon={<UploadOutlined />}>Choose Image</Button>
+                </Upload>
                 <Button type="primary" onClick={handleUpload} loading={loading}>
                     Upload
                 </Button>
             </Space>
 
-            {/* Table for Uploaded Treks */}
+            {/* Table for Trek Data */}
             <Table
-                style={{ width: "100%", maxWidth: "1100px" }}
+                style={{ width: "100%", maxWidth: "1000px" }}
                 loading={loading}
                 columns={columns}
-                dataSource={images.map((image) => ({ ...image, key: image.id }))}
+                dataSource={dataSource}
                 pagination={{ pageSize: 5 }}
+                rowKey="id"
             />
+
+            {/* Edit Modal */}
+            <Modal
+                title="Edit Trek"
+                visible={editModalVisible}
+                onCancel={() => setEditModalVisible(false)}
+                onOk={handleEditSubmit}
+            >
+                <Form form={editForm} layout="vertical">
+                    <Form.Item name="name" label="Trek Name" rules={[{ required: true }]}>
+                        <Input placeholder="Trek Name" />
+                    </Form.Item>
+                    <Form.Item name="price" label="Price" rules={[{ required: true }]}>
+                        <Input placeholder="Price" />
+                    </Form.Item>
+                    <Form.Item name="days" label="Duration" rules={[{ required: true }]}>
+                        <Input placeholder="Duration" />
+                    </Form.Item>
+                    <Form.Item name="rating" label="Rating" rules={[{ required: true }]}>
+                        <Select placeholder="Select Rating">
+                            <Option value={1}>1 ★</Option>
+                            <Option value={2}>2 ★</Option>
+                            <Option value={3}>3 ★</Option>
+                            <Option value={4}>4 ★</Option>
+                            <Option value={5}>5 ★</Option>
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="location" label="Location" rules={[{ required: true }]}>
+                        <Input placeholder="Location" />
+                    </Form.Item>
+                    <Form.Item name="category" label="Category" rules={[{ required: true }]}>
+                        <Input placeholder="Category" />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
-};
+}
 
 export default UpdateData;
