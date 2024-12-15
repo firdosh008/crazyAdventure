@@ -4,7 +4,6 @@ import {
     Button,
     Popconfirm,
     Space,
-    Upload,
     Input,
     Select,
     message,
@@ -12,7 +11,7 @@ import {
     Form,
 } from "antd";
 import { useEffect, useState } from "react";
-import { DeleteOutlined, UploadOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -24,8 +23,8 @@ function Reviews() {
         email: "",
         review: "",
         stars: null,
+        imageUrl: "", // Add field for image URL
     });
-    const [imageFile, setImageFile] = useState(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [currentEditId, setCurrentEditId] = useState(null);
     const [editForm] = Form.useForm();
@@ -51,8 +50,8 @@ function Reviews() {
 
     // Handle Upload
     const handleUpload = () => {
-        const { name, email, review, stars } = formData;
-        if (!name || !email || !review || !stars || !imageFile) {
+        const { name, email, review, stars, imageUrl } = formData;
+        if (!name || !email || !review || !stars || !imageUrl) {
             message.warning("Please provide all the required details.");
             return;
         }
@@ -62,7 +61,7 @@ function Reviews() {
         uploadData.append("email", email);
         uploadData.append("review", review);
         uploadData.append("stars", stars);
-        uploadData.append("image", imageFile);
+        uploadData.append("image", imageUrl); // Send image URL instead of file
 
         fetch("http://localhost:5000/api/reviews/add", {
             method: "POST",
@@ -71,8 +70,7 @@ function Reviews() {
             .then(() => {
                 message.success("Review uploaded successfully!");
                 fetchReviews();
-                setFormData({ name: "", email: "", review: "", stars: null });
-                setImageFile(null);
+                setFormData({ name: "", email: "", review: "", stars: null, imageUrl: "" });
             })
             .catch(() => message.error("Failed to upload review."));
     };
@@ -97,6 +95,7 @@ function Reviews() {
             email: record.email,
             review: record.review,
             stars: record.stars,
+            imageUrl: record.image, // Set the image URL in the form
         });
     };
 
@@ -107,7 +106,7 @@ function Reviews() {
             updateData.append("email", values.email);
             updateData.append("review", values.review);
             updateData.append("stars", values.stars);
-            if (imageFile) updateData.append("image", imageFile);
+            updateData.append("image", values.imageUrl); // Send image URL instead of file
 
             fetch(`http://localhost:5000/api/reviews/update/${currentEditId}`, {
                 method: "PUT",
@@ -116,7 +115,6 @@ function Reviews() {
                 .then(() => {
                     message.success("Review updated successfully!");
                     setEditModalVisible(false);
-                    setImageFile(null);
                     fetchReviews();
                 })
                 .catch(() => message.error("Failed to update the review."));
@@ -237,16 +235,12 @@ function Reviews() {
                     <Option value={4}>4 ★</Option>
                     <Option value={5}>5 ★</Option>
                 </Select>
-                <Upload
-                    beforeUpload={(file) => {
-                        setImageFile(file);
-                        return false;
-                    }}
-                    maxCount={1}
-                    accept="image/*"
-                >
-                    <Button icon={<UploadOutlined />}>Choose Image</Button>
-                </Upload>
+                <Input
+                    placeholder="Image URL"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    style={{ width: "200px" }}
+                />
                 <Button type="primary" onClick={handleUpload} loading={loading}>
                     Upload Review
                 </Button>
@@ -287,6 +281,9 @@ function Reviews() {
                             <Option value={4}>4 ★</Option>
                             <Option value={5}>5 ★</Option>
                         </Select>
+                    </Form.Item>
+                    <Form.Item name="imageUrl" label="Image URL" rules={[{ required: true }]}>
+                        <Input placeholder="Image URL" />
                     </Form.Item>
                 </Form>
             </Modal>

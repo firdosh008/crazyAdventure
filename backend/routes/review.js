@@ -1,16 +1,15 @@
 import express from "express";
-import multer from "multer"; // For handling image uploads
+import multer from "multer"; // For handling image uploads (optional)
 const router = express.Router();
 import db from "../config/db.js";
 
-// Multer setup for handling image uploads
+// Multer setup for handling image uploads (still kept if needed in future)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // 1. API to Upload a Review
 router.post("/add", upload.single("image"), (req, res) => {
-  const { name, email, review, stars } = req.body;
-  const image = req.file ? req.file.buffer : null;
+  const { name, email, review, stars, image } = req.body; // Expecting image URL in body
 
   // Validate input
   if (!name || !email || !review || stars === undefined || stars < 1 || stars > 5) {
@@ -19,8 +18,11 @@ router.post("/add", upload.single("image"), (req, res) => {
     });
   }
 
+  // If image is uploaded, handle file, otherwise use URL
+  const imageData = req.file ? req.file.buffer : image;
+
   const query = "INSERT INTO reviews (name, email, review, stars, image) VALUES (?, ?, ?, ?, ?)";
-  db.query(query, [name, email, review, stars, image], (err, result) => {
+  db.query(query, [name, email, review, stars, imageData], (err, result) => {
     if (err) {
       console.error("Error inserting review:", err);
       return res.status(500).json({ message: "Database error." });
@@ -45,7 +47,7 @@ router.get("/all", (req, res) => {
       review: row.review,
       stars: row.stars,
       created_at: row.created_at,
-      image: row.image ? `data:image/jpeg;base64,${row.image.toString("base64")}` : null,
+      image: row.image, // Process base64 image if present
     }));
 
     res.status(200).json(reviews);
@@ -72,8 +74,8 @@ router.delete("/delete/:id", (req, res) => {
 // 4. API to Update a Review by ID
 router.put("/update/:id", upload.single("image"), (req, res) => {
   const { id } = req.params;
-  const { name, email, review, stars } = req.body;
-  const image = req.file ? req.file.buffer : null;
+  const { name, email, review, stars, image } = req.body; // Expecting image URL in body
+  const imageData = req.file ? req.file.buffer : image;
 
   // Validate input
   if (!name || !email || !review || stars === undefined || stars < 1 || stars > 5) {
@@ -82,11 +84,11 @@ router.put("/update/:id", upload.single("image"), (req, res) => {
     });
   }
 
-  const query = image
+  const query = imageData
     ? "UPDATE reviews SET name = ?, email = ?, review = ?, stars = ?, image = ? WHERE id = ?"
     : "UPDATE reviews SET name = ?, email = ?, review = ?, stars = ? WHERE id = ?";
 
-  const params = image ? [name, email, review, stars, image, id] : [name, email, review, stars, id];
+  const params = imageData ? [name, email, review, stars, imageData, id] : [name, email, review, stars, id];
 
   db.query(query, params, (err, result) => {
     if (err) {

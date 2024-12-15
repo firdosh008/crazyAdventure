@@ -15,6 +15,7 @@ const HeroSection = () => {
       .get("http://localhost:5000/api/hero_section")
       .then((response) => {
         setImages(response.data); // Assuming the API returns an array of image objects
+        console.log("Images fetched successfully:", response.data);
         setLoading(false);
       })
       .catch((error) => {

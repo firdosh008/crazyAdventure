@@ -29,6 +29,7 @@ function UpdateData() {
             .get("http://localhost:5000/api/tour")
             .then((response) => {
                 setDataSource(response.data);
+                console.log(response.data);
                 setLoading(false);
             })
             .catch(() => {
@@ -44,11 +45,6 @@ function UpdateData() {
     // Handle Upload
     const handleUpload = () => {
         const { name, price, days, rating, location, listing, category } = formData;
-        if (!name || !price || !days || !rating || !location || !listing || !category || !imageFile) {
-            message.warning("Please provide all the required details.");
-            return;
-        }
-
         const uploadData = new FormData();
         uploadData.append("name", name);
         uploadData.append("price", price);
@@ -173,7 +169,7 @@ function UpdateData() {
             render: (imageUrl) => (
                 imageUrl ? (
                     <img
-                        src={`${imageUrl}`}
+                        // src={`data:image/jpeg;base64,${Buffer.from(imageUrl).toString("base64")}`}
                         alt="Trek"
                         style={{ width: "50px", height: "50px", objectFit: "cover" }}
                     />
