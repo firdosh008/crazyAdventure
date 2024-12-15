@@ -124,7 +124,58 @@ app.delete("/api/slider_images/:id", (req, res) => {
 
 
 
+app.get("/api/tour", (req, res) => {
+  const query = "SELECT * FROM tour"; // Adjust based on your table name
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Error fetching tours:", err);
+      return res.status(500).json({ message: "Failed to fetch tours" });
+    }
+    res.json(results);
+  });
+});
 
+app.post("/api/tour/upload", upload.single("image"), (req, res) => {
+  const { image_name, price, days, rating, location, listing, category } = req.body;
+  const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+  if (!image_name || !price || !days || !rating || !location || !listing || !category || !image) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const query = `
+    INSERT INTO tour (image_name, image, rating, price, days, location, listing, category)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    query,
+    [image_name, image, rating, price, days, location, listing, category],
+    (err, result) => {
+      if (err) {
+        console.error("Error uploading tour:", err);
+        return res.status(500).json({ message: "Failed to upload tour" });
+      }
+      res.json({ message: "Tour uploaded successfully" });
+    }
+  );
+});
+
+app.delete("/api/tour/:id", (req, res) => {
+  const { id } = req.params;
+  const query = "DELETE FROM tour WHERE id = ?";
+
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Error deleting tour:", err);
+      return res.status(500).json({ message: "Failed to delete tour" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Tour not found" });
+    }
+    res.json({ message: "Tour deleted successfully" });
+  });
+});
 
 // Add session middleware for Google OAuth
 app.use(

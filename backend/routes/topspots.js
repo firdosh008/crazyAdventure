@@ -9,29 +9,29 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // Route to upload image and image name to the database with category = 'top_spots'
-router.post("/upload", upload.single("image"), (req, res) => {
-  const { image_name } = req.body;
+// router.post("/upload", upload.single("image"), (req, res) => {
+//   const { image_name } = req.body;
 
-  if (!image_name || !req.file) {
-    return res.status(400).json({ message: "Image and image name are required" });
-  }
+//   if (!image_name || !req.file) {
+//     return res.status(400).json({ message: "Image and image name are required" });
+//   }
 
-  const image = req.file.buffer; // Buffer for the binary data of the image
-  const listing = 10; // Default listing value
-  const category = "top_spots"; // Explicitly set the category
+//   const image = req.file.buffer; // Buffer for the binary data of the image
+//   const listing = 10; // Default listing value
+//   const category = "top_spots"; // Explicitly set the category
 
-  db.query(
-    "INSERT INTO tour (image, image_name, listing, category) VALUES (?, ?, ?, ?)",
-    [image, image_name, listing, category],
-    (error, results) => {
-      if (error) {
-        console.error("Error uploading image:", error);
-        return res.status(500).json({ message: "Failed to upload image" });
-      }
-      res.status(201).json({ message: "Image uploaded successfully", id: results.insertId });
-    }
-  );
-});
+//   db.query(
+//     "INSERT INTO tour (image, image_name, listing, category) VALUES (?, ?, ?, ?)",
+//     [image, image_name, listing, category],
+//     (error, results) => {
+//       if (error) {
+//         console.error("Error uploading image:", error);
+//         return res.status(500).json({ message: "Failed to upload image" });
+//       }
+//       res.status(201).json({ message: "Image uploaded successfully", id: results.insertId });
+//     }
+//   );
+// });
 
 // Route to fetch all records where category = 'top_spots'
 router.get("/fetch", (req, res) => {
@@ -63,25 +63,25 @@ router.get("/fetch", (req, res) => {
 });
 
 // Route to delete a record by ID and category = 'top_spots'
-router.delete("/:id", (req, res) => {
-  const { id } = req.params;
+// router.delete("/:id", (req, res) => {
+//   const { id } = req.params;
 
-  db.query(
-    "DELETE FROM tour WHERE id = ? AND category = 'top_spots'",
-    [id],
-    (error, results) => {
-      if (error) {
-        console.error("Error deleting record:", error);
-        return res.status(500).json({ message: "Failed to delete record" });
-      }
+//   db.query(
+//     "DELETE FROM tour WHERE id = ? AND category = 'top_spots'",
+//     [id],
+//     (error, results) => {
+//       if (error) {
+//         console.error("Error deleting record:", error);
+//         return res.status(500).json({ message: "Failed to delete record" });
+//       }
 
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ message: "Record not found" });
-      }
+//       if (results.affectedRows === 0) {
+//         return res.status(404).json({ message: "Record not found" });
+//       }
 
-      res.json({ message: "Record deleted successfully" });
-    }
-  );
-});
+//       res.json({ message: "Record deleted successfully" });
+//     }
+//   );
+// });
 
 export default router;

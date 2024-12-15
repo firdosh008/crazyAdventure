@@ -2,20 +2,13 @@ import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import Bookings from "./Bookings";
 import Reviews from "./Reviews";
-import UploadSliderImages from "./UploadSliderImage";
-import UploadWinterTracks from "./Wintertracks";
-import UploadPopularTour from "./PopularTour";
-import UploadTopSpots from "./TopSpots";
+import UpdateData from "./UpdateData";
 import { Menu } from "antd";
 import {
   CloudDownloadOutlined,
   UploadOutlined,
   PictureOutlined,
-  FileImageOutlined,
-  EnvironmentOutlined,
-  BookOutlined,
   FileTextOutlined,
-  UserOutlined
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
@@ -64,17 +57,11 @@ const Dashboard = () => {
       case "1":
         return <Bookings />;
       case "2":
-        return <UploadSliderImages />;
+        return <UpdateData />;
       case "3":
-        return <UploadWinterTracks/>;
-      case "4":
-        return <UploadPopularTour/>;
-      case "5":
-        return <UploadTopSpots/>;
-      case "6":
         return <div>Blogs Content</div>;
-      case "7":
-        return <Reviews/>;
+      case "4":
+        return <Reviews />;
       default:
         return <div>Select an option from the sidebar</div>;
     }
@@ -94,30 +81,15 @@ const Dashboard = () => {
           <Menu.Item key="1" icon={<CloudDownloadOutlined />}>
             View Booking
           </Menu.Item>
-          <Menu.SubMenu
-            key="upload_section"
-            icon={<UploadOutlined />}
-            title="Uploads"
-          >
-            <Menu.Item key="2" icon={<FileImageOutlined />}>
-              Slider Images
-            </Menu.Item>
-            <Menu.Item key="3" icon={<EnvironmentOutlined />}>
-              Upcoming Winter Track
-            </Menu.Item>
-            <Menu.Item key="4" icon={<PictureOutlined />}>
-              Most Popular Tour
-            </Menu.Item>
-            <Menu.Item key="5" icon={<FileTextOutlined />}>
-              Top Spots
-            </Menu.Item>
-            <Menu.Item key="6" icon={<BookOutlined />}>
-              Blogs
-            </Menu.Item>
-            <Menu.Item key="7" icon={<UserOutlined />}>
-              Reviews
-            </Menu.Item>
-          </Menu.SubMenu>
+          <Menu.Item key="2" icon={<UploadOutlined />}>
+            Update Data
+          </Menu.Item>
+          <Menu.Item key="3" icon={<FileTextOutlined />}>
+            Blogs
+          </Menu.Item>
+          <Menu.Item key="4" icon={<PictureOutlined />}>
+            Reviews
+          </Menu.Item>
         </Menu>
 
         {/* Main Content */}
