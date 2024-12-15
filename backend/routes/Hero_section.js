@@ -8,7 +8,7 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// API to upload an image to the `hero_section` table
+// API to upload an image to the `tour` table with category = 'slider'
 router.post("/upload", upload.single("image"), (req, res) => {
   const { originalname } = req.file;
   const imageData = req.file.buffer;
@@ -17,9 +17,11 @@ router.post("/upload", upload.single("image"), (req, res) => {
     return res.status(400).json({ message: "Image and image name are required" });
   }
 
+  const category = "slider"; // Set the category explicitly to 'slider'
+
   db.query(
-    "INSERT INTO hero_section (image_data, image_name) VALUES (?, ?)",
-    [imageData, originalname],
+    "INSERT INTO tour (image, image_name, category) VALUES (?, ?, ?)",
+    [imageData, originalname, category],
     (error, results) => {
       if (error) {
         console.error("Error uploading image:", error);
@@ -30,46 +32,54 @@ router.post("/upload", upload.single("image"), (req, res) => {
   );
 });
 
-// API to fetch all images from the `hero_section` table
+// API to fetch all images from the `tour` table where category = 'slider'
 router.get("/", (req, res) => {
-  db.query("SELECT id, image_name, image_data, created_at FROM hero_section", (error, results) => {
-    if (error) {
-      console.error("Error fetching images:", error);
-      return res.status(500).json({ message: "Failed to fetch images" });
+  db.query(
+    "SELECT id, image_name, image  FROM tour WHERE category = 'slider'",
+    (error, results) => {
+      if (error) {
+        console.error("Error fetching images:", error);
+        return res.status(500).json({ message: "Failed to fetch images" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: "No images found" });
+      }
+
+      // Convert binary image data to base64
+      const images = results.map((row) => ({
+        id: row.id,
+        image_name: row.image_name,
+        image_data: row.image
+          ? `data:image/jpeg;base64,${Buffer.from(row.image).toString("base64")}`
+          : null,
+      }));
+
+      res.json(images);
     }
-
-    if (results.length === 0) {
-      return res.status(404).json({ message: "No images found" });
-    }
-
-    // Convert binary image data to base64
-    const images = results.map((row) => ({
-      id: row.id,
-      image_name: row.image_name,
-      image_data: `data:image/jpeg;base64,${Buffer.from(row.image_data).toString("base64")}`,
-      created_at: row.created_at,
-    }));
-
-    res.json(images);
-  });
+  );
 });
 
-// API to delete an image from the `hero_section` table by ID
+// API to delete an image from the `tour` table by ID and category = 'slider'
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
 
-  db.query("DELETE FROM hero_section WHERE id = ?", [id], (error, results) => {
-    if (error) {
-      console.error("Error deleting image:", error);
-      return res.status(500).json({ message: "Failed to delete image" });
-    }
+  db.query(
+    "DELETE FROM tour WHERE id = ? AND category = 'slider'",
+    [id],
+    (error, results) => {
+      if (error) {
+        console.error("Error deleting image:", error);
+        return res.status(500).json({ message: "Failed to delete image" });
+      }
 
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ message: "Image not found" });
-    }
+      if (results.affectedRows === 0) {
+        return res.status(404).json({ message: "Image not found" });
+      }
 
-    res.status(200).json({ message: "Image deleted successfully" });
-  });
+      res.status(200).json({ message: "Image deleted successfully" });
+    }
+  );
 });
 
 export default router;

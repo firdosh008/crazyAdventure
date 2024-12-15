@@ -18,10 +18,11 @@ router.post("/upload", upload.single("image"), (req, res) => {
 
   const image = req.file.buffer; // Buffer for the binary data of the image
   const rating = 5; // Default rating
+  const category = "popular_tours"; // Set the category explicitly
 
   db.query(
-    "INSERT INTO most_popular_tours (image, image_name, price, rating, days) VALUES (?, ?, ?, ?, ?)",
-    [image, image_name, price, rating, days],
+    "INSERT INTO tour (image, image_name, price, rating, days, category) VALUES (?, ?, ?, ?, ?, ?)",
+    [image, image_name, price, rating, days, category],
     (error, results) => {
       if (error) {
         console.error("Error uploading image:", error);
@@ -32,10 +33,10 @@ router.post("/upload", upload.single("image"), (req, res) => {
   );
 });
 
-// Route to fetch all images with name, rating, price, and days
+// Route to fetch all images with name, rating, price, and days for "popular_tours"
 router.get("/fetch", (req, res) => {
   db.query(
-    "SELECT id, image_name, image, rating, price, days FROM most_popular_tours",
+    "SELECT id, image_name, image, rating, price, days FROM tour WHERE category = 'popular_tours'",
     (error, results) => {
       if (error) {
         console.error("Error fetching data:", error);
@@ -67,7 +68,7 @@ router.get("/fetch", (req, res) => {
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
 
-  db.query("DELETE FROM most_popular_tours WHERE id = ?", [id], (error, results) => {
+  db.query("DELETE FROM tour WHERE id = ? AND category = 'popular_tours'", [id], (error, results) => {
     if (error) {
       console.error("Error deleting image:", error);
       return res.status(500).json({ message: "Failed to delete image" });
@@ -80,5 +81,6 @@ router.delete("/:id", (req, res) => {
     res.json({ message: "Image deleted successfully" });
   });
 });
+
 
 export default router;
