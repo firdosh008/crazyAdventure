@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Table, Typography, Button, Popconfirm, Space, Upload, Input, Select, message, Modal, Form } from "antd";
-import { DeleteOutlined, UploadOutlined, EditOutlined } from "@ant-design/icons";
+import { Table, Typography, Button, Popconfirm, Space, Input, Select, message, Modal, Form } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 const { Option } = Select;
@@ -16,8 +16,8 @@ function UpdateData() {
         location: "",
         listing: "",
         category: "",
+        imageUrl: "", // New field to store the image URL
     });
-    const [imageFile, setImageFile] = useState(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [currentEditId, setCurrentEditId] = useState(null);
     const [editForm] = Form.useForm();
@@ -42,9 +42,9 @@ function UpdateData() {
         fetchTrekData();
     }, []);
 
-    // Handle Upload
+    // Handle Upload (Add Image URL instead of file)
     const handleUpload = () => {
-        const { name, price, days, rating, location, listing, category } = formData;
+        const { name, price, days, rating, location, listing, category, imageUrl } = formData;
         const uploadData = new FormData();
         uploadData.append("name", name);
         uploadData.append("price", price);
@@ -53,7 +53,7 @@ function UpdateData() {
         uploadData.append("location", location);
         uploadData.append("listing", listing);
         uploadData.append("category", category);
-        uploadData.append("image", imageFile);
+        uploadData.append("image", imageUrl); // Image URL
 
         axios
             .post("http://localhost:5000/api/tour/upload", uploadData)
@@ -68,8 +68,8 @@ function UpdateData() {
                     location: "",
                     listing: "",
                     category: "",
+                    imageUrl: "", // Reset the image URL input
                 });
-                setImageFile(null);
             })
             .catch(() => message.error("Failed to upload trek."));
     };
@@ -97,6 +97,7 @@ function UpdateData() {
             location: record.location,
             listing: record.listing,
             category: record.category,
+            imageUrl: record.image, // Set image URL in the form
         });
     };
 
@@ -110,14 +111,13 @@ function UpdateData() {
             updateData.append("location", values.location);
             updateData.append("listing", values.listing);
             updateData.append("category", values.category);
-            if (imageFile) updateData.append("image", imageFile);
+            updateData.append("image", values.imageUrl); // Image URL instead of file
 
             axios
                 .put(`http://localhost:5000/api/tour/update/${currentEditId}`, updateData)
                 .then(() => {
                     message.success("Trek updated successfully!");
                     setEditModalVisible(false);
-                    setImageFile(null);
                     fetchTrekData();
                 })
                 .catch(() => message.error("Failed to update the trek."));
@@ -164,12 +164,12 @@ function UpdateData() {
         },
         {
             title: "Image",
-            dataIndex: "image",
-            key: "image",
+            dataIndex: "image_url",
+            key: "image_url",
             render: (imageUrl) => (
                 imageUrl ? (
                     <img
-                        // src={`data:image/jpeg;base64,${Buffer.from(imageUrl).toString("base64")}`}
+                        src={imageUrl}
                         alt="Trek"
                         style={{ width: "50px", height: "50px", objectFit: "cover" }}
                     />
@@ -204,7 +204,6 @@ function UpdateData() {
             ),
         },
     ];
-
 
     return (
         <div
@@ -262,16 +261,12 @@ function UpdateData() {
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     style={{ width: "200px" }}
                 />
-                <Upload
-                    beforeUpload={(file) => {
-                        setImageFile(file);
-                        return false;
-                    }}
-                    maxCount={1}
-                    accept="image/*"
-                >
-                    <Button icon={<UploadOutlined />}>Choose Image</Button>
-                </Upload>
+                <Input
+                    placeholder="Enter image URL"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    style={{ width: "200px" }}
+                />
                 <Button type="primary" onClick={handleUpload} loading={loading}>
                     Upload
                 </Button>
@@ -318,6 +313,9 @@ function UpdateData() {
                     </Form.Item>
                     <Form.Item name="category" label="Category" rules={[{ required: true }]}>
                         <Input placeholder="Category" />
+                    </Form.Item>
+                    <Form.Item name="imageUrl" label="Image URL" rules={[{ required: true }]}>
+                        <Input placeholder="Image URL" />
                     </Form.Item>
                 </Form>
             </Modal>

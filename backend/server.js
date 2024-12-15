@@ -50,39 +50,39 @@ app.use("/api/top_spots", topSpotsRoutes);
 // Multer configuration for handling image uploads
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Image upload route with image_name support
-app.post("/api/slider_upload", upload.single("image"), (req, res) => {
-  const { imageName, category } = req.body; // Expecting imageName and category from the frontend
+// // Image upload route with image_name support
+// app.post("/api/slider_upload", upload.single("image"), (req, res) => {
+//   const { imageName, category } = req.body; // Expecting imageName and category from the frontend
 
-  if (!req.file || !imageName || !category) {
-    return res.status(400).json({ message: "File, image name, or category missing" });
-  }
+//   if (!req.file || !imageName || !category) {
+//     return res.status(400).json({ message: "File, image name, or category missing" });
+//   }
 
-  const imageData = req.file.buffer; // Image data as buffer
+//   const imageData = req.file.buffer; // Image data as buffer
 
-  db.query(
-    "INSERT INTO tour (image_name, image, category) VALUES (?, ?, ?)",
-    [imageData, imageName, category],
-    (error, results) => {
-      if (error) {
-        if (error.fatal) {
-          console.error('Fatal error in database connection:', error);
-        } else {
-          console.error("Error uploading image:", error);
-        }
-        return res.status(500).json({ message: "Failed to upload image" });
-      }
-      res.status(201).json({
-        message: "Image uploaded successfully",
-        imageId: results.insertId,
-      });
-    }
-  );
-});
+//   db.query(
+//     "INSERT INTO tour (image_name, image, category) VALUES (?, ?, ?)",
+//     [imageData, imageName, category],
+//     (error, results) => {
+//       if (error) {
+//         if (error.fatal) {
+//           console.error('Fatal error in database connection:', error);
+//         } else {
+//           console.error("Error uploading image:", error);
+//         }
+//         return res.status(500).json({ message: "Failed to upload image" });
+//       }
+//       res.status(201).json({
+//         message: "Image uploaded successfully",
+//         imageId: results.insertId,
+//       });
+//     }
+//   );
+// });
 
 app.get("/api/slider_images", (req, res) => {
   db.query(
-    "SELECT id, image, image_name, location FROM tour WHERE category = 'winter_track'",
+    "SELECT id, image_url, image_name, location FROM tour WHERE category = 'winter_track'",
     (error, results) => {
       if (error) {
         console.error("Error fetching images:", error);
@@ -94,7 +94,7 @@ app.get("/api/slider_images", (req, res) => {
         id: row.id,
         image_name: row.image_name,
         location: row.location,
-        image_data: `data:image/jpeg;base64,${Buffer.from(row.image).toString("base64")}`,
+        image_data: row.image_url,
       }));
 
       res.json(images); // Send images as JSON
@@ -102,16 +102,16 @@ app.get("/api/slider_images", (req, res) => {
   );
 });
 
-app.delete("/api/slider_images/:id", (req, res) => {
-  const { id } = req.params;
-  db.query("DELETE FROM tour WHERE id = ?", [id], (error) => {
-    if (error) {
-      console.error("Error deleting image:", error);
-      return res.status(500).json({ message: "Failed to delete image" });
-    }
-    res.status(200).json({ message: "Image deleted successfully" });
-  });
-});
+// app.delete("/api/slider_images/:id", (req, res) => {
+//   const { id } = req.params;
+//   db.query("DELETE FROM tour WHERE id = ?", [id], (error) => {
+//     if (error) {
+//       console.error("Error deleting image:", error);
+//       return res.status(500).json({ message: "Failed to delete image" });
+//     }
+//     res.status(200).json({ message: "Image deleted successfully" });
+//   });
+// });
 
 app.get("/api/tour", (req, res) => {
   const query = "SELECT * FROM tour"; // Adjust based on your table name
@@ -120,22 +120,27 @@ app.get("/api/tour", (req, res) => {
       console.error("Error fetching tours:", err);
       return res.status(500).json({ message: "Failed to fetch tours" });
     }
-    res.json(results);
+    res.json(results); // Return results as is, assuming `image_url` is stored correctly in the database
   });
 });
 
-app.post("/api/tour/upload", upload.single("image"), (req, res) => {
-  const { image_name, price, days, rating, location, listing, category } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+app.post("/api/tour/upload", (req, res) => {
+  const { image_url, image_name, price, days, rating, location, listing, category } = req.body;
+
+  // Ensure that an image URL is provided
+  if (!image_url) {
+    return res.status(400).json({ message: "Image URL is required" });
+  }
 
   const query = `
-    INSERT INTO tour (image_name, image, rating, price, days, location, listing, category)
+    INSERT INTO tour (image_name, image_url, rating, price, days, location, listing, category)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(
     query,
-    [image_name, image, rating, price, days, location, listing, category],
+    [image_name, image_url, rating, price, days, location, listing, category],
     (err, result) => {
       if (err) {
         console.error("Error uploading tour:", err);
@@ -145,6 +150,7 @@ app.post("/api/tour/upload", upload.single("image"), (req, res) => {
     }
   );
 });
+
 
 app.delete("/api/tour/:id", (req, res) => {
   const { id } = req.params;
@@ -163,20 +169,24 @@ app.delete("/api/tour/:id", (req, res) => {
 });
 
 // New API for updating a tour (add this route)
-app.put("/api/tour/update/:id", upload.single("image"), (req, res) => {
+app.put("/api/tour/update/:id", (req, res) => {
   const { id } = req.params;
-  const { image_name, price, days, rating, location, listing, category } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
+  const { image_url, image_name, price, days, rating, location, listing, category } = req.body;
+
+  // Ensure image URL is provided
+  if (!image_url) {
+    return res.status(400).json({ message: "Image URL is required" });
+  }
 
   const query = `
     UPDATE tour
-    SET image_name = ?, image = ?, rating = ?, price = ?, days = ?, location = ?, listing = ?, category = ?
+    SET image_name = ?, image_url = ?, rating = ?, price = ?, days = ?, location = ?, listing = ?, category = ?
     WHERE id = ?
   `;
 
   db.query(
     query,
-    [image_name, image, rating, price, days, location, listing, category, id],
+    [image_name, image_url, rating, price, days, location, listing, category, id],
     (err, result) => {
       if (err) {
         console.error("Error updating tour:", err);
@@ -189,6 +199,7 @@ app.put("/api/tour/update/:id", upload.single("image"), (req, res) => {
     }
   );
 });
+
 
 // Add session middleware for Google OAuth
 app.use(

@@ -36,7 +36,7 @@ const router = express.Router();
 // Route to fetch all images with name, rating, price, and days for "popular_tours"
 router.get("/fetch", (req, res) => {
   db.query(
-    "SELECT id, image_name, image, rating, price, days FROM tour WHERE category = 'popular_tours'",
+    "SELECT id, image_name, image_url, rating, price, days FROM tour WHERE category = 'popular_tours'",
     (error, results) => {
       if (error) {
         console.error("Error fetching data:", error);
@@ -54,9 +54,7 @@ router.get("/fetch", (req, res) => {
         rating: row.rating,
         price: row.price,
         days: row.days,
-        image: row.image
-          ? `data:image/jpeg;base64,${Buffer.from(row.image).toString("base64")}`
-          : null, // Handle null or undefined image data
+        image: row.image_url
       }));
 
       res.json(tours);

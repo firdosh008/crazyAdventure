@@ -35,7 +35,7 @@ const router = express.Router();
 // API to fetch all images from the `tour` table where category = 'slider'
 router.get("/", (req, res) => {
   db.query(
-    "SELECT id, image_name, image  FROM tour WHERE category = 'slider'",
+    "SELECT id, image_name, image_url  FROM tour WHERE category = 'slider'",
     (error, results) => {
       if (error) {
         console.error("Error fetching images:", error);
@@ -50,9 +50,7 @@ router.get("/", (req, res) => {
       const images = results.map((row) => ({
         id: row.id,
         image_name: row.image_name,
-        image_data: row.image
-          ? `data:image/jpeg;base64,${Buffer.from(row.image).toString("base64")}`
-          : null,
+        image_data: row.image_url
       }));
 
       res.json(images);

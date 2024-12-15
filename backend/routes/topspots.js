@@ -36,7 +36,7 @@ const upload = multer({ storage });
 // Route to fetch all records where category = 'top_spots'
 router.get("/fetch", (req, res) => {
   db.query(
-    "SELECT id, image_name, image, listing FROM tour WHERE category = 'top_spots'",
+    "SELECT id, image_name, image_url, listing FROM tour WHERE category = 'top_spots'",
     (error, results) => {
       if (error) {
         console.error("Error fetching data:", error);
@@ -52,9 +52,7 @@ router.get("/fetch", (req, res) => {
         id: row.id,
         image_name: row.image_name,
         listing: row.listing,
-        image: row.image
-          ? `data:image/jpeg;base64,${Buffer.from(row.image).toString("base64")}`
-          : null, // Handle null or undefined image data
+        image: row.image_url
       }));
 
       res.json(spots);
