@@ -97,7 +97,7 @@ function UpdateData() {
             location: record.location,
             listing: record.listing,
             category: record.category,
-            imageUrl: record.image, // Set image URL in the form
+            imageUrl: record.image_url, // Set image URL in the form
         });
     };
 
@@ -285,7 +285,7 @@ function UpdateData() {
             {/* Edit Modal */}
             <Modal
                 title="Edit Trek"
-                visible={editModalVisible}
+                open={editModalVisible}
                 onCancel={() => setEditModalVisible(false)}
                 onOk={handleEditSubmit}
             >
