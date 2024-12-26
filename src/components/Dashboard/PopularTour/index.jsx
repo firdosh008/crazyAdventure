@@ -16,7 +16,7 @@ const PopularTour = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get("http://localhost:5000/api/most_popular_tours/fetch")
+      .get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/most_popular_tours/fetch")
       .then((response) => {
         console.log("Fetched images:", response.data);
         setImages(response.data);
@@ -48,7 +48,7 @@ const PopularTour = () => {
 
     setLoading(true);
     axios
-      .post("http://localhost:5000/api/most_popular_tours/upload", formData)
+      .post("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/most_popular_tours/upload", formData)
       .then(() => {
         message.success("Trek uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -69,7 +69,7 @@ const PopularTour = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`http://localhost:5000/api/most_popular_tours/${id}`)
+      .delete(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/most_popular_tours/${id}`)
       .then(() => {
         message.success("Trek deleted successfully!");
         fetchImages();

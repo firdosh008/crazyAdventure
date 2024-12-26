@@ -8,7 +8,7 @@ function Orders() {
 
   // Fetch bookings
   const getBookingsData = () => {
-    return fetch("http://localhost:5000/api/bookings").then((res) => res.json());
+    return fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/bookings").then((res) => res.json());
   };
 
   // Fetch data when the component loads
@@ -34,7 +34,7 @@ function Orders() {
   // Handle Delete Booking
   const handleDelete = (id) => {
     setLoading(true);
-    fetch(`http://localhost:5000/api/bookings/${id}`, { method: "DELETE" })
+    fetch(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/bookings/${id}`, { method: "DELETE" })
       .then((res) => {
         if (res.ok) {
           message.success("Booking deleted successfully!");

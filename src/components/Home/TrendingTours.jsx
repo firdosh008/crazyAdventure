@@ -51,7 +51,7 @@ const TrendingTours = () => {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/slider_images");
+        const response = await fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/slider_images");
         const data = await response.json();
         setImages(data);
       } catch (error) {

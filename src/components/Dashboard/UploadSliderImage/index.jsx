@@ -12,7 +12,7 @@ const UploadSliderImages = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get("http://localhost:5000/api/hero_section")
+      .get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/hero_section")
       .then((response) => {
         setImages(response.data);
         setLoading(false);
@@ -39,7 +39,7 @@ const UploadSliderImages = () => {
     formData.append("image", file);
     setLoading(true);
     axios
-      .post("http://localhost:5000/api/hero_section/upload", formData)
+      .post("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/hero_section/upload", formData)
       .then(() => {
         message.success("Image uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -56,7 +56,7 @@ const UploadSliderImages = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`http://localhost:5000/api/hero_section/${id}`)
+      .delete(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/hero_section/${id}`)
       .then(() => {
         message.success("Image deleted successfully!");
         fetchImages(); // Refresh the list

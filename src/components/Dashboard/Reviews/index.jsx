@@ -32,7 +32,7 @@ function Reviews() {
     // Fetch Reviews Data
     const fetchReviews = () => {
         setLoading(true);
-        fetch("http://localhost:5000/api/reviews/all")
+        fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/reviews/all")
             .then((res) => res.json())
             .then((data) => {
                 setDataSource(data);
@@ -63,7 +63,7 @@ function Reviews() {
         uploadData.append("stars", stars);
         uploadData.append("image", imageUrl); // Send image URL instead of file
 
-        fetch("http://localhost:5000/api/reviews/add", {
+        fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/reviews/add", {
             method: "POST",
             body: uploadData,
         })
@@ -77,7 +77,7 @@ function Reviews() {
 
     // Handle Delete
     const handleDelete = (id) => {
-        fetch(`http://localhost:5000/api/reviews/delete/${id}`, { method: "DELETE" })
+        fetch(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/reviews/delete/${id}`, { method: "DELETE" })
             .then(() => {
                 message.success("Review deleted successfully!");
                 setDataSource((prev) => prev.filter((item) => item.id !== id));
@@ -108,7 +108,7 @@ function Reviews() {
             updateData.append("stars", values.stars);
             updateData.append("image", values.imageUrl); // Send image URL instead of file
 
-            fetch(`http://localhost:5000/api/reviews/update/${currentEditId}`, {
+            fetch(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/reviews/update/${currentEditId}`, {
                 method: "PUT",
                 body: updateData,
             })

@@ -14,7 +14,7 @@ const UploadWinterTracks = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get("http://localhost:5000/api/slider_images")
+      .get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/slider_images")
       .then((response) => {
         setImages(response.data);
         setLoading(false);
@@ -44,7 +44,7 @@ const UploadWinterTracks = () => {
 
     setLoading(true);
     axios
-      .post("http://localhost:5000/api/slider_upload", formData)
+      .post("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/slider_upload", formData)
       .then(() => {
         message.success("Image uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -63,7 +63,7 @@ const UploadWinterTracks = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`http://localhost:5000/api/slider_images/${id}`)
+      .delete(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/slider_images/${id}`)
       .then(() => {
         message.success("Image deleted successfully!");
         fetchImages(); // Refresh the list

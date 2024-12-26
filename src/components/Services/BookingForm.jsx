@@ -51,7 +51,7 @@ const BookingForm = ({ Trekname, price }) => {
     setError(""); // Reset any previous error
 
     // Send data to API
-    fetch("http://localhost:5000/api/book", {
+    fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/book", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

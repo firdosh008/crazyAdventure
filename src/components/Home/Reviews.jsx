@@ -57,12 +57,11 @@ const TestimonialSection = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
-  const navigate = useNavigate();
 
   // Fetch reviews data from API
   const fetchReviews = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/reviews/all");
+      const response = await fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/reviews/all");
       const data = await response.json();
       setReviews(data);
     } catch (error) {
@@ -74,20 +73,6 @@ const TestimonialSection = () => {
     fetchReviews();
   }, []);
 
-  const handleUpload = (values) => {
-    console.log(values);
-    fetch("http://localhost:5000/api/reviews/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    })
-      .then(() => {
-        message.success("Review uploaded successfully!");
-        form.resetFields();
-        navigate("/");
-      })
-      .catch(() => message.error("Failed to upload review."));
-  };
 
   return (
     <div

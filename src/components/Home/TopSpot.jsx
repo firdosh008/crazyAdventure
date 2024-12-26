@@ -41,7 +41,7 @@ const TopSpot = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:5000/api/top_spots/fetch");
+        const response = await axios.get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/top_spots/fetch");
         setTrekListings(response.data);
       } catch (error) {
         console.error("Error fetching Top Spots:", error);

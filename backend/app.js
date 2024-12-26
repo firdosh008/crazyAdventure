@@ -32,6 +32,10 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 // Add booking routes
 app.use("/api", bookingRoutes);
 
+app.get("/", (req,res)=>{
+  res.send("Live runing");
+});
+
 // Routes for review 
 app.use("/api/reviews", reviewRoutes);
 
@@ -243,7 +247,7 @@ app.get("/api/auth/logout", (req, res) => {
 });
 
 // Start the server
-const PORT = 5000;
+const PORT = process.env.Port || 5000 ;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
