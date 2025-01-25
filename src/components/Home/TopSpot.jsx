@@ -8,6 +8,7 @@ import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+import { URLS } from "../../Utils/urls";
 
 // Top Spot Card Component
 const TopSpotCard = ({ props }) => {
@@ -41,7 +42,7 @@ const TopSpot = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/top_spots/fetch");
+        const response = await axios.get(`${URLS.backendUrl}:5000/api/top_spots/fetch`);
         setTrekListings(response.data);
       } catch (error) {
         console.error("Error fetching Top Spots:", error);

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { URLS } from "../../Utils/urls";
 
 const ReviewForm = () => {
   const [formData, setFormData] = useState({
@@ -56,7 +57,7 @@ const ReviewForm = () => {
     console.log(uploadData);
     try {
       setLoading(true);
-      const response = await fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/reviews/add", {
+      const response = await fetch(`${URLS.backendUrl}:5000/api/reviews/add`, {
         method: "POST",
         body: uploadData,
       });

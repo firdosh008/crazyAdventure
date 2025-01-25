@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Typography, Table, Button, Upload, message, Space } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { URLS } from "../../../Utils/urls";
 
 const UploadTopSpots = () => {
   const [images, setImages] = useState([]);
@@ -12,7 +13,7 @@ const UploadTopSpots = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/top_spots/fetch")
+      .get(`${URLS.backendUrl}:5000/api/top_spots/fetch`)
       .then((response) => {
         console.log("Fetched images:", response.data);
         setImages(response.data);
@@ -41,7 +42,7 @@ const UploadTopSpots = () => {
     setLoading(true);
 
     axios
-      .post("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/top_spots/upload", formData)
+      .post(`${URLS.backendUrl}:5000/api/top_spots/upload`, formData)
       .then(() => {
         message.success("Image uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -58,7 +59,7 @@ const UploadTopSpots = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/top_spots/${id}`)
+      .delete(`${URLS.backendUrl}:5000/api/top_spots/${id}`)
       .then(() => {
         message.success("Image deleted successfully!");
         fetchImages(); // Refresh the list

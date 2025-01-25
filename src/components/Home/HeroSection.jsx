@@ -4,15 +4,15 @@ import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import { FaArrowRight } from "react-icons/fa";
 import axios from "axios";
+import {URLS} from "../../Utils/urls"
 
 const HeroSection = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-
   // Fetch images from the API
   useEffect(() => {
     axios
-      .get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/hero_section")
+      .get(`${URLS.backendUrl}:5000/api/hero_section`)
       .then((response) => {
         setImages(response.data); // Assuming the API returns an array of image objects
         console.log("Images fetched successfully:", response.data);

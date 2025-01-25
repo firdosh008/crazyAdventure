@@ -10,6 +10,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { URLS } from "../../Utils/urls";
 
 const TrendingTourLocation = ({ props }) => {
   return (
@@ -51,7 +52,7 @@ const TrendingTours = () => {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/slider_images");
+        const response = await fetch(`${URLS.backendUrl}:5000/api/slider_images`);
         const data = await response.json();
         setImages(data);
       } catch (error) {

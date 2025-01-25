@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Table, Typography, Button, Popconfirm, Space, Input, Select, message, Modal, Form } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { URLS } from "../../../Utils/urls";
 
 const { Option } = Select;
 
@@ -26,7 +27,7 @@ function UpdateData() {
     const fetchTrekData = () => {
         setLoading(true);
         axios
-            .get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/tour")
+            .get(`${URLS.backendUrl}:5000/api/tour`)
             .then((response) => {
                 setDataSource(response.data);
                 console.log(response.data);
@@ -56,7 +57,7 @@ function UpdateData() {
         uploadData.append("image", imageUrl); // Image URL
 
         axios
-            .post("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/tour/upload", uploadData)
+            .post(`${URLS.backendUrl}:5000/api/tour/upload`, uploadData)
             .then(() => {
                 message.success("Trek uploaded successfully!");
                 fetchTrekData();
@@ -77,7 +78,7 @@ function UpdateData() {
     // Handle Delete
     const handleDelete = (id) => {
         axios
-            .delete(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/tour/${id}`)
+            .delete(`${URLS.backendUrl}:5000/api/tour/${id}`)
             .then(() => {
                 message.success("Trek deleted successfully!");
                 setDataSource((prev) => prev.filter((item) => item.id !== id));
@@ -114,7 +115,7 @@ function UpdateData() {
             updateData.append("image", values.imageUrl); // Image URL instead of file
 
             axios
-                .put(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/tour/update/${currentEditId}`, updateData)
+                .put(`${URLS.backendUrl}:5000/api/tour/update/${currentEditId}`, updateData)
                 .then(() => {
                     message.success("Trek updated successfully!");
                     setEditModalVisible(false);

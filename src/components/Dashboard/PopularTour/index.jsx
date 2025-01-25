@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Typography, Table, Button, Upload, message, Space, Input } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { URLS } from "../../../Utils/urls";
 
 const PopularTour = () => {
   const [images, setImages] = useState([]);
@@ -16,7 +17,7 @@ const PopularTour = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/most_popular_tours/fetch")
+      .get(`${URLS.backendUrl}:5000/api/most_popular_tours/fetch`)
       .then((response) => {
         console.log("Fetched images:", response.data);
         setImages(response.data);
@@ -48,7 +49,7 @@ const PopularTour = () => {
 
     setLoading(true);
     axios
-      .post("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/most_popular_tours/upload", formData)
+      .post(`${URLS.backendUrl}:5000/api/most_popular_tours/upload`, formData)
       .then(() => {
         message.success("Trek uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -69,7 +70,7 @@ const PopularTour = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/most_popular_tours/${id}`)
+      .delete(`${URLS.backendUrl}:5000/api/most_popular_tours/${id}`)
       .then(() => {
         message.success("Trek deleted successfully!");
         fetchImages();

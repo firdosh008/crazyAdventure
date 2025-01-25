@@ -9,6 +9,7 @@ import "swiper/css/pagination";
 import googleLogo from "../../assets/google.png";
 import bgLineImage from "../../assets/background/line-pattern2.png";
 import { useNavigate } from "react-router-dom";
+import { URLS } from "../../Utils/urls";
 
 const { Option } = Select;
 
@@ -61,7 +62,7 @@ const TestimonialSection = () => {
   // Fetch reviews data from API
   const fetchReviews = async () => {
     try {
-      const response = await fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/reviews/all");
+      const response = await fetch(`${URLS.backendUrl}:5000/api/reviews/all`);
       const data = await response.json();
       setReviews(data);
     } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { URLS } from "../../Utils/urls";
 
 const BookingForm = ({ Trekname, price }) => {
   const [name, setName] = useState("");
@@ -51,7 +52,7 @@ const BookingForm = ({ Trekname, price }) => {
     setError(""); // Reset any previous error
 
     // Send data to API
-    fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/book", {
+    fetch(`${URLS.backendUrl}:5000/api/book`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

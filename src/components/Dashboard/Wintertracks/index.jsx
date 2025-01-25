@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Typography, Table, Button, Upload, message, Space, Input } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { URLS } from "../../../Utils/urls";
 
 const UploadWinterTracks = () => {
   const [images, setImages] = useState([]);
@@ -14,7 +15,7 @@ const UploadWinterTracks = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/slider_images")
+      .get(`${URLS.backendUrl}:5000/api/slider_images`)
       .then((response) => {
         setImages(response.data);
         setLoading(false);
@@ -44,7 +45,7 @@ const UploadWinterTracks = () => {
 
     setLoading(true);
     axios
-      .post("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/slider_upload", formData)
+      .post(`${URLS.backendUrl}:5000/api/slider_upload`, formData)
       .then(() => {
         message.success("Image uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -63,7 +64,7 @@ const UploadWinterTracks = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/slider_images/${id}`)
+      .delete(`${URLS.backendUrl}:5000/api/slider_images/${id}`)
       .then(() => {
         message.success("Image deleted successfully!");
         fetchImages(); // Refresh the list

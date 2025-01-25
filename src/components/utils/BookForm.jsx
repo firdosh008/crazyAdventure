@@ -5,6 +5,7 @@ import { CiUser } from "react-icons/ci";
 import { AiOutlineWechatWork } from "react-icons/ai";
 import { BsSendFill } from "react-icons/bs";
 import formBgImage from "../../assets/Kedarkantha_Trek_thumb.jpg";
+import { URLS } from "../../Utils/urls";
 
 const BookForm = () => {
   const [isOpenselect, setIsOpenSelect] = useState(false);
@@ -29,7 +30,7 @@ const BookForm = () => {
     e.preventDefault();
     setIsSubmitting(true); // Disable button during submission
     try {
-      const response = await axios.post("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/book", formData);
+      const response = await axios.post(`${URLS.backendUrl}:5000/api/book`, formData);
       console.log("Form submitted:", response);
       if (response.status === 201 || response.status === 200) {
         alert("Form submitted successfully!");

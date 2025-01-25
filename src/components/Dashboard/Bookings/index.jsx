@@ -1,6 +1,7 @@
 import { Space, Table, Typography, Button, message } from "antd";
 import { useEffect, useState } from "react";
 import { DeleteOutlined } from "@ant-design/icons";
+import { URLS } from "../../../Utils/urls";
 
 function Orders() {
   const [loading, setLoading] = useState(false);
@@ -8,7 +9,7 @@ function Orders() {
 
   // Fetch bookings
   const getBookingsData = () => {
-    return fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/bookings").then((res) => res.json());
+    return fetch(`${URLS.backendUrl}:5000/api/bookings`).then((res) => res.json());
   };
 
   // Fetch data when the component loads
@@ -34,7 +35,7 @@ function Orders() {
   // Handle Delete Booking
   const handleDelete = (id) => {
     setLoading(true);
-    fetch(`http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/bookings/${id}`, { method: "DELETE" })
+    fetch(`${URLS.backendUrl}:5000/api/bookings/${id}`, { method: "DELETE" })
       .then((res) => {
         if (res.ok) {
           message.success("Booking deleted successfully!");

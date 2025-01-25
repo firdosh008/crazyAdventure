@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { URLS } from "../../Utils/urls";
 
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -30,7 +31,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/auth/login", {
+      const response = await fetch(`${URLS.backendUrl}:5000/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +69,7 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/auth/google";
+    window.location.href = `${URLS.backendUrl}:5000/api/auth/google`;
   };
 
   return (

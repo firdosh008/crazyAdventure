@@ -24,6 +24,7 @@ import { setActive } from "@material-tailwind/react/components/Tabs/TabsContext"
 
 import { useTrek } from "../../Context/SelectedServiceContext";
 import { treksData } from "../utils/TreksData";
+import { URLS } from "../../Utils/urls";
 
 const navbarProps = {
   Logo: { type: "img", text: "LOGO GOES HERE !", img: "/vite.svg" },
@@ -275,7 +276,7 @@ export default function Nav() {
 
   const handle_logout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/logout", {
+      const response = await fetch(`${URLS.backendUrl}:5000/api/auth/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

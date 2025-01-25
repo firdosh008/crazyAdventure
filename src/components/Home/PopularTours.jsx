@@ -11,6 +11,7 @@ import "swiper/css/navigation";
 
 import { Autoplay, Pagination } from "swiper/modules";
 import PopularLocation from "../utils/PopularLocation";
+import { URLS } from "../../Utils/urls";
 
 const PopularTours = () => {
   const [trekListings, setTrekListings] = useState([]); // State to store fetched trek data
@@ -19,7 +20,7 @@ const PopularTours = () => {
   useEffect(() => {
     const fetchTrekListings = async () => {
       try {
-        const response = await fetch("http://ec2-13-201-64-212.ap-south-1.compute.amazonaws.com:5000/api/most_popular_tours/fetch"); // Replace with your API endpoint
+        const response = await fetch(`${URLS.backendUrl}:5000/api/most_popular_tours/fetch`); // Replace with your API endpoint
         if (!response.ok) {
           throw new Error("Failed to fetch trek listings");
         }
