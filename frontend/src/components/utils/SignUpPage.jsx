@@ -32,7 +32,7 @@ const SignUpPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${URLS.backendUrl}:5000/api/auth/register`, {
+      const response = await fetch(`${URLS.backendUrl}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,7 +65,7 @@ const SignUpPage = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${URLS.backendUrl}:5000/api/auth/google`;
+    window.location.href = `${URLS.backendUrl}/api/auth/google`;
   };
 
   return (

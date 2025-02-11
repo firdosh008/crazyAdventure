@@ -227,7 +227,7 @@ export function Footer() {
           <span class="text-sm text-white sm:text-center ">
             © 2023{" "}
             <a
-              href="https://www.thecrazymountaineers.com/"
+              href="https://www.thecrazymountaineers.in/"
               class="hover:underline"
             >
               The Crazy Adventure™

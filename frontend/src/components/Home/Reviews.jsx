@@ -62,7 +62,7 @@ const TestimonialSection = () => {
   // Fetch reviews data from API
   const fetchReviews = async () => {
     try {
-      const response = await fetch(`${URLS.backendUrl}:5000/api/reviews/all`);
+      const response = await fetch(`${URLS.backendUrl}/api/reviews/all`);
       const data = await response.json();
       setReviews(data);
     } catch (error) {

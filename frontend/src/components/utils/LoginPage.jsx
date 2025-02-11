@@ -31,7 +31,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${URLS.backendUrl}:5000/api/auth/login`, {
+      const response = await fetch(`${URLS.backendUrl}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${URLS.backendUrl}:5000/api/auth/google`;
+    window.location.href = `${URLS.backendUrl}/api/auth/google`;
   };
 
   return (

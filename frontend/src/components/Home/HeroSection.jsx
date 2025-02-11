@@ -12,7 +12,7 @@ const HeroSection = () => {
   // Fetch images from the API
   useEffect(() => {
     axios
-      .get(`${URLS.backendUrl}:5000/api/hero_section`)
+      .get(`${URLS.backendUrl}/api/hero_section`)
       .then((response) => {
         setImages(response.data); // Assuming the API returns an array of image objects
         console.log("Images fetched successfully:", response.data);

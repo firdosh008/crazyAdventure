@@ -6,7 +6,7 @@ import navBarLogo from "../../../assets/cm-logo.png";
 const Logo = () => {
   return (
     <a
-      href="https://thecrazymountaineers.com/"
+      href="https://thecrazymountaineers.in/"
       className="logo wrapper w-[8rem]  sm:w-48 flex items-center justify-center px-2"
     >
       <img src={navBarLogo} alt="logo" />

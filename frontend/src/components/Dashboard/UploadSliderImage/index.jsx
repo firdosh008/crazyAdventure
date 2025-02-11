@@ -13,7 +13,7 @@ const UploadSliderImages = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get(`${URLS.backendUrl}:5000/api/hero_section`)
+      .get(`${URLS.backendUrl}/api/hero_section`)
       .then((response) => {
         setImages(response.data);
         setLoading(false);
@@ -40,7 +40,7 @@ const UploadSliderImages = () => {
     formData.append("image", file);
     setLoading(true);
     axios
-      .post(`${URLS.backendUrl}:5000/api/hero_section/upload`, formData)
+      .post(`${URLS.backendUrl}/api/hero_section/upload`, formData)
       .then(() => {
         message.success("Image uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -57,7 +57,7 @@ const UploadSliderImages = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`${URLS.backendUrl}:5000/api/hero_section/${id}`)
+      .delete(`${URLS.backendUrl}/api/hero_section/${id}`)
       .then(() => {
         message.success("Image deleted successfully!");
         fetchImages(); // Refresh the list

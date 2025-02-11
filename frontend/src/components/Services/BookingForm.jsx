@@ -52,7 +52,7 @@ const BookingForm = ({ Trekname, price }) => {
     setError(""); // Reset any previous error
 
     // Send data to API
-    fetch(`${URLS.backendUrl}:5000/api/book`, {
+    fetch(`${URLS.backendUrl}/api/book`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,7 +88,7 @@ const BookingForm = ({ Trekname, price }) => {
 
   const initiatePayment = async (orderId) => {
     try {
-      const response = await fetch(`${URLS.backendUrl}:5000/api/initiate-payment`, {
+      const response = await fetch(`${URLS.backendUrl}/api/initiate-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId, amount: totalPrice }),

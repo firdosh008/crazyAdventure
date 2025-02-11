@@ -13,7 +13,7 @@ const UploadTopSpots = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get(`${URLS.backendUrl}:5000/api/top_spots/fetch`)
+      .get(`${URLS.backendUrl}/api/top_spots/fetch`)
       .then((response) => {
         console.log("Fetched images:", response.data);
         setImages(response.data);
@@ -42,7 +42,7 @@ const UploadTopSpots = () => {
     setLoading(true);
 
     axios
-      .post(`${URLS.backendUrl}:5000/api/top_spots/upload`, formData)
+      .post(`${URLS.backendUrl}/api/top_spots/upload`, formData)
       .then(() => {
         message.success("Image uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -59,7 +59,7 @@ const UploadTopSpots = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`${URLS.backendUrl}:5000/api/top_spots/${id}`)
+      .delete(`${URLS.backendUrl}/api/top_spots/${id}`)
       .then(() => {
         message.success("Image deleted successfully!");
         fetchImages(); // Refresh the list

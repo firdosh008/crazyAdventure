@@ -27,7 +27,7 @@ function UpdateData() {
     const fetchTrekData = () => {
         setLoading(true);
         axios
-            .get(`${URLS.backendUrl}:5000/api/tour`)
+            .get(`${URLS.backendUrl}/api/tour`)
             .then((response) => {
                 setDataSource(response.data);
                 console.log(response.data);
@@ -57,7 +57,7 @@ function UpdateData() {
         uploadData.append("image", imageUrl); // Image URL
 
         axios
-            .post(`${URLS.backendUrl}:5000/api/tour/upload`, uploadData)
+            .post(`${URLS.backendUrl}/api/tour/upload`, uploadData)
             .then(() => {
                 message.success("Trek uploaded successfully!");
                 fetchTrekData();
@@ -78,7 +78,7 @@ function UpdateData() {
     // Handle Delete
     const handleDelete = (id) => {
         axios
-            .delete(`${URLS.backendUrl}:5000/api/tour/${id}`)
+            .delete(`${URLS.backendUrl}/api/tour/${id}`)
             .then(() => {
                 message.success("Trek deleted successfully!");
                 setDataSource((prev) => prev.filter((item) => item.id !== id));
@@ -115,7 +115,7 @@ function UpdateData() {
             updateData.append("image", values.imageUrl); // Image URL instead of file
 
             axios
-                .put(`${URLS.backendUrl}:5000/api/tour/update/${currentEditId}`, updateData)
+                .put(`${URLS.backendUrl}/api/tour/update/${currentEditId}`, updateData)
                 .then(() => {
                     message.success("Trek updated successfully!");
                     setEditModalVisible(false);

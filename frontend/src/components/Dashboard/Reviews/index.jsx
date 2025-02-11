@@ -33,7 +33,7 @@ function Reviews() {
     // Fetch Reviews Data
     const fetchReviews = () => {
         setLoading(true);
-        fetch(`${URLS.backendUrl}:5000/api/reviews/all`)
+        fetch(`${URLS.backendUrl}/api/reviews/all`)
             .then((res) => res.json())
             .then((data) => {
                 setDataSource(data);
@@ -64,7 +64,7 @@ function Reviews() {
         uploadData.append("stars", stars);
         uploadData.append("image", imageUrl); // Send image URL instead of file
 
-        fetch(`${URLS.backendUrl}:5000/api/reviews/add`, {
+        fetch(`${URLS.backendUrl}/api/reviews/add`, {
             method: "POST",
             body: uploadData,
         })
@@ -78,7 +78,7 @@ function Reviews() {
 
     // Handle Delete
     const handleDelete = (id) => {
-        fetch(`${URLS.backendUrl}:5000/api/reviews/delete/${id}`, { method: "DELETE" })
+        fetch(`${URLS.backendUrl}/api/reviews/delete/${id}`, { method: "DELETE" })
             .then(() => {
                 message.success("Review deleted successfully!");
                 setDataSource((prev) => prev.filter((item) => item.id !== id));
@@ -109,7 +109,7 @@ function Reviews() {
             updateData.append("stars", values.stars);
             updateData.append("image", values.imageUrl); // Send image URL instead of file
 
-            fetch(`${URLS.backendUrl}:5000/api/reviews/update/${currentEditId}`, {
+            fetch(`${URLS.backendUrl}/api/reviews/update/${currentEditId}`, {
                 method: "PUT",
                 body: updateData,
             })

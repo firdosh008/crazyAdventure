@@ -20,7 +20,7 @@ const PopularTours = () => {
   useEffect(() => {
     const fetchTrekListings = async () => {
       try {
-        const response = await fetch(`${URLS.backendUrl}:5000/api/most_popular_tours/fetch`); // Replace with your API endpoint
+        const response = await fetch(`${URLS.backendUrl}/api/most_popular_tours/fetch`); // Replace with your API endpoint
         if (!response.ok) {
           throw new Error("Failed to fetch trek listings");
         }

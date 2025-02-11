@@ -276,7 +276,7 @@ export default function Nav() {
 
   const handle_logout = async () => {
     try {
-      const response = await fetch(`${URLS.backendUrl}:5000/api/auth/logout`, {
+      const response = await fetch(`${URLS.backendUrl}/api/auth/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

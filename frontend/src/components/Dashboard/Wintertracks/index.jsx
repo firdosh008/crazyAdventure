@@ -15,7 +15,7 @@ const UploadWinterTracks = () => {
   const fetchImages = () => {
     setLoading(true);
     axios
-      .get(`${URLS.backendUrl}:5000/api/slider_images`)
+      .get(`${URLS.backendUrl}/api/slider_images`)
       .then((response) => {
         setImages(response.data);
         setLoading(false);
@@ -45,7 +45,7 @@ const UploadWinterTracks = () => {
 
     setLoading(true);
     axios
-      .post(`${URLS.backendUrl}:5000/api/slider_upload`, formData)
+      .post(`${URLS.backendUrl}/api/slider_upload`, formData)
       .then(() => {
         message.success("Image uploaded successfully!");
         fetchImages(); // Refresh the list
@@ -64,7 +64,7 @@ const UploadWinterTracks = () => {
   const handleDelete = (id) => {
     setLoading(true);
     axios
-      .delete(`${URLS.backendUrl}:5000/api/slider_images/${id}`)
+      .delete(`${URLS.backendUrl}/api/slider_images/${id}`)
       .then(() => {
         message.success("Image deleted successfully!");
         fetchImages(); // Refresh the list

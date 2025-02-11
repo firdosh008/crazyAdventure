@@ -57,7 +57,7 @@ const ReviewForm = () => {
     console.log(uploadData);
     try {
       setLoading(true);
-      const response = await fetch(`${URLS.backendUrl}:5000/api/reviews/add`, {
+      const response = await fetch(`${URLS.backendUrl}/api/reviews/add`, {
         method: "POST",
         body: uploadData,
       });

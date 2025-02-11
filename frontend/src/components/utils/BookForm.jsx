@@ -30,7 +30,7 @@ const BookForm = () => {
     e.preventDefault();
     setIsSubmitting(true); // Disable button during submission
     try {
-      const response = await axios.post(`${URLS.backendUrl}:5000/api/book`, formData);
+      const response = await axios.post(`${URLS.backendUrl}/api/book`, formData);
       console.log("Form submitted:", response);
       if (response.status === 201 || response.status === 200) {
         alert("Form submitted successfully!");
