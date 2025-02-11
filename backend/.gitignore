@@ -1,2 +1,5 @@
 node_modules
 .env
+config.json
+backend/privateKey.pem
+backend/key_345a6e87f3264d31b49cad5deeef6383.pem

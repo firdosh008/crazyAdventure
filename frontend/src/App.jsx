@@ -33,6 +33,7 @@ import LoginPage from "./components/utils/LoginPage";
 import SignUpPage from "./components/utils/SignUpPage";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { useTrek } from "./Context/SelectedServiceContext";
+import PaymentStatus from "./components/Services/payment";
 
 function App() {
   const { selectedTrek, setSelectedTrek } = useTrek();
@@ -73,6 +74,7 @@ function App() {
         <Route path="/login" element={<><Nav /> <LoginPage /><Footer /></>} />
         <Route path="/signup" element={<><Nav /> <SignUpPage /><Footer /></>} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/payment-status" element={<PaymentStatus />} />
       </Routes>
       
     </div>

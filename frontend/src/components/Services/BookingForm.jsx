@@ -61,18 +61,11 @@ const BookingForm = ({ Trekname, price }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        setLoading(false);
+        
         console.log(data);
         if (data.message === "Booking saved successfully") {
-          alert("Booking successful!");
-          // Reset form after successful booking
-          setName("");
-          setPhone("");
-          setEmail("");
-          setAge(0);
-          setCountryCode("+91");
-          setTrekDate(new Date());
-          setNumberOfPeople(1);
+          initiatePayment(data.bookingId);
+          
         } else {
           setError("Booking failed. Please try again.");
         }
@@ -80,6 +73,8 @@ const BookingForm = ({ Trekname, price }) => {
       .catch((err) => {
         setLoading(false);
         setError("An error occurred. Please try again.");
+      }).finally(() => {
+        setLoading(false);
       });
   };
 
@@ -89,6 +84,34 @@ const BookingForm = ({ Trekname, price }) => {
     if (value === "" || /^[0-9\b]+$/.test(value)) {
       setter(value);
     }
+  };
+
+  const initiatePayment = async (orderId) => {
+    try {
+      const response = await fetch(`${URLS.backendUrl}:5000/api/initiate-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, amount: totalPrice }),
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.paymentUrl) {
+          setName("");
+          setPhone("");
+          setEmail("");
+          setAge(0);
+          setCountryCode("+91");
+          setTrekDate(new Date());
+          setNumberOfPeople(1);
+          window.location.href = data.paymentUrl;
+          alert("Booking successful!");
+      } else {
+        setError("Failed to initiate payment. Try again.");
+      }
+    } catch (err) {
+      setError("Payment error. Please try again.");
+    }
+    setLoading(false);
   };
 
   return (

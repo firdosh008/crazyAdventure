@@ -16,14 +16,75 @@ import blogRoutes from "./routes/blog.js";
 import popularTourRoutes from "./routes/most_popular_tour.js";
 import heroSectionRoutes from "./routes/hero_section.js";
 import topSpotsRoutes from "./routes/topspots.js";
+import fs from 'fs';
+import { Juspay, APIError } from 'expresscheckout-nodejs';
+import config from './config.json' assert { type: 'json' };
+
 
 dotenv.config();
 const app = express();
+
+
+const SANDBOX_BASE_URL = "https://smartgatewayuat.hdfcbank.com/session";
+const PRODUCTION_BASE_URL = "https://smartgateway.hdfcbank.com/session";
+
+// Read keys from config.json
+const publicKey = fs.readFileSync(config.PUBLIC_KEY_PATH);
+const privateKey = fs.readFileSync(config.PRIVATE_KEY_PATH);
+const paymentPageClientId = config.PAYMENT_PAGE_CLIENT_ID;
+
+const juspay = new Juspay({
+    merchantId: config.MERCHANT_ID,
+    baseUrl: SANDBOX_BASE_URL,  // Change to PRODUCTION_BASE_URL when live
+    jweAuth: {
+        keyId: config.KEY_UUID,
+        publicKey,
+        privateKey
+    }
+});
 
 // Middleware
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+// Create Payment Session
+app.post('/api/initiate-payment', async (req, res) => {
+    const { amount } = req.body;
+    const orderId = `order_${Date.now()}`;
+    const returnUrl = `${req.protocol}://${req.hostname}:5000/api/payment-response`;
+    console.log("Return URL: ", amount);
+    try {
+        const sessionResponse = await juspay.orderSession.create({
+            order_id: orderId,
+            amount: amount,
+            payment_page_client_id: paymentPageClientId,
+            customer_id: 'customer_one',
+            action: 'paymentPage',
+            return_url: returnUrl,
+            currency: 'INR'
+        });
+        return res.json({ paymentUrl: sessionResponse.payment_links.web });
+    } catch (error) {
+        return res.status(500).json({ error: error.message || "Payment initiation failed" });
+    }
+});
+
+// Handle Payment Response
+app.post('/api/payment-response', async (req, res) => {
+    const orderId = req.body.order_id || req.body.orderId;
+    if (!orderId) return res.status(400).json({ error: 'Invalid Order ID' });
+
+    try {
+        const statusResponse = await juspay.order.status(orderId);
+        return res.redirect(`http://localhost:5173/payment-status?status=${paymentStatus}&orderId=${orderId}`);
+    } catch (error) {
+        return res.redirect(`http://localhost:5173/payment-status?status=failed`)
+}});
+
+
 
 // Add these lines to increase the upload size limit
 app.use(express.json({ limit: "100mb" }));
