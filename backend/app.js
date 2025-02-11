@@ -16,9 +16,10 @@ import blogRoutes from "./routes/blog.js";
 import popularTourRoutes from "./routes/most_popular_tour.js";
 import heroSectionRoutes from "./routes/hero_section.js";
 import topSpotsRoutes from "./routes/topspots.js";
-import fs from 'fs';
 import { Juspay, APIError } from 'expresscheckout-nodejs';
-import config from './config.json' assert { type: 'json' };
+import fs from 'fs';
+
+const config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
 
 
 dotenv.config();
