@@ -286,7 +286,8 @@ export default function Nav() {
 
       if (response.ok) {
         localStorage.removeItem("auth_token");
-        localStorage.removeItem("name");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("username");
         localStorage.removeItem("admin");
         console.log("Successfully logged out");
         navigate("/");
@@ -340,7 +341,7 @@ export default function Nav() {
           </div>
           <div className="text-gray-400">|</div>
           <div className="flex flex-row justify-center items-center">
-            {localStorage.getItem("auth_token") == null ? (
+            {localStorage.getItem("userId") == null ? (
               <div className="transition-all duration-300 delay-150 ease-in-out">
                 <button onClick={() => navigate("/login")}>Sign In | </button>
                 <button onClick={() => navigate("/signup")}>  Register</button>

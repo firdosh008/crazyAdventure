@@ -11,19 +11,53 @@ const BookingForm = ({ Trekname, price }) => {
   const [age, setAge] = useState(0); // Initial value as integer 0
   const [trekDate, setTrekDate] = useState(new Date()); // Default to current date
   const [numberOfPeople, setNumberOfPeople] = useState(1); // Default 1 person
-  const numericPrice = parseFloat(price.replace(/[^0-9.]/g, "")); // Remove non-numeric characters
-  const [totalPrice, setTotalPrice] = useState(numericPrice);
-
+  const [basePrice, setBasePrice] = useState(0);
+  const [priceWithCharges, setPriceWithCharges] = useState(0);
+  const [amountPaid, setAmountPaid] = useState(1000); // minimum payment
+  const [remainingAmount, setRemainingAmount] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  // Update total price whenever number of people changes
+
+  // Simplified login check
   useEffect(() => {
-    setTotalPrice(numberOfPeople * numericPrice);
-  }, [numberOfPeople, numericPrice]);
-  
+    const storedUserId = localStorage.getItem('userId');
+    const storedName = localStorage.getItem('name');
+    console.log(storedUserId, storedName);
+    if (storedUserId && storedName) {
+      setIsLoggedIn(true);
+      setUserId(storedUserId);
+      setName(storedName); // Optionally pre-fill the name field
+    }
+  }, []);
+
+  // Calculate prices
+  useEffect(() => {
+    const basePriceValue = numberOfPeople * parseFloat(price.replace(/[^0-9.]/g, ""));
+    const charges = amountPaid * 0.05; // 5% GST
+    setBasePrice(basePriceValue);
+    setPriceWithCharges(amountPaid + charges);
+    setRemainingAmount(basePriceValue - amountPaid);
+  }, [numberOfPeople, price, amountPaid]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!isLoggedIn) {
+      setError("Please login to continue with booking");
+      return;
+    }
+
+    if (amountPaid < 1000) {
+      setError("Minimum booking amount is ₹1000");
+      return;
+    }
+
+    if (amountPaid > priceWithCharges) {
+      setError("Payment amount cannot be greater than total amount");
+      return;
+    }
 
     // Validate required fields
     if (!name || !phone || !email || !age || !trekDate || !numberOfPeople) {
@@ -31,20 +65,20 @@ const BookingForm = ({ Trekname, price }) => {
       return;
     }
 
-    // Format trek_date to YYYY-MM-DD
-    const formattedTrekDate = trekDate.toISOString().split("T")[0]; // "YYYY-MM-DD"
-
     // Prepare data to be sent to the API
     const bookingData = {
       name,
       email,
       phoneNumber: `${countryCode} ${phone}`,
-      countryCode: countryCode,
-      age: parseInt(age), // Ensure age is an integer
-      trekDate: formattedTrekDate,
-      numberOfPeople: parseInt(numberOfPeople), // Ensure numberOfPeople is an integer
+      age,
+      trekDate: trekDate.toISOString().split("T")[0],
+      numberOfPeople: parseInt(numberOfPeople),
       Trekname,
-      totalPrice,
+      price: basePrice,
+      priceWithCharges,
+      amountPaid,
+      remainingAmount,
+      userId
     };
     console.log(bookingData);
 
@@ -91,7 +125,7 @@ const BookingForm = ({ Trekname, price }) => {
       const response = await fetch(`${URLS.backendUrl}/api/initiate-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, amount: totalPrice }),
+        body: JSON.stringify({ orderId, amount: priceWithCharges }),
       });
       const data = await response.json();
       console.log(data);
@@ -239,15 +273,45 @@ const BookingForm = ({ Trekname, price }) => {
           />
         </div>
 
-        {/* Total Price (Read-Only) */}
+        {/* Price Details */}
         <div className="flex flex-col">
-          <label htmlFor="totalPrice" className="text-sm font-semibold mb-1">
-            Total Price
-          </label>
+          <label className="text-sm font-semibold mb-1">Track Price</label>
           <input
-            id="totalPrice"
             type="text"
-            value={`₹${totalPrice}`}
+            value={`₹${basePrice.toFixed(2)}`}
+            readOnly
+            className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
+          />
+        </div>
+
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold mb-1">Paying Amount</label>
+          <input
+            type="number"
+            value={amountPaid}
+            onChange={(e) => setAmountPaid(Number(e.target.value))}
+            min="1000"
+            max={priceWithCharges}
+            className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold mb-1">Paying Amount with GST</label>
+          <input
+            type="text"
+            value={`₹${priceWithCharges.toFixed(2)}`}
+            readOnly
+            className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold mb-1">Remaining Amount</label>
+          <input
+            type="text"
+            value={`₹${remainingAmount.toFixed(2)}`}
             readOnly
             className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
           />

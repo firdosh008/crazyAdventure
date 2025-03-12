@@ -55,7 +55,7 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/api/initiate-payment', async (req, res) => {
     const { amount } = req.body;
     const orderId = `order_${Date.now()}`;
-    const returnUrl = `${req.protocol}://${req.hostname}:5000/api/payment-response`;
+    const returnUrl = `${req.protocol}://${req.hostname}:80/api/payment-response`;
     console.log("Return URL: ", amount);
     try {
         const sessionResponse = await juspay.orderSession.create({

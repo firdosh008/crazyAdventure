@@ -42,6 +42,7 @@ export const login = (req, res) => {
     );
 
     // Log the admin status and username for debugging
+    console.log("user id:", user.id);
     console.log("User is admin:", user.isAdmin);
     console.log("Username:", user.username);
 
@@ -52,6 +53,7 @@ export const login = (req, res) => {
         token,
         isAdmin: user.isAdmin, // Include admin status
         username: user.username, // Add username to the response
+        userId: user.id, // Add userId to the response
       });
   });
 };

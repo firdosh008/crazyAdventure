@@ -22,6 +22,7 @@ function Orders() {
     getBookingsData()
       .then((res) => {
         setDataSource(res);
+        console.log(res);
       })
       .catch((error) => {
         console.error("Error fetching bookings:", error);
@@ -53,6 +54,12 @@ function Orders() {
       });
   };
 
+  // Helper function to format price
+  const formatPrice = (value) => {
+    const number = parseFloat(value) || 0;
+    return `₹${number.toFixed(2)}`;
+  };
+
   return (
     <div
       style={{
@@ -72,9 +79,10 @@ function Orders() {
         loading={loading}
         columns={[
           {
-            title: "ID",
-            dataIndex: "id",
-            key: "id",
+            title: "S.No",
+            key: "serialNumber",
+            render: (_, __, index) => index + 1,
+            width: 80,
           },
           {
             title: "Name",
@@ -87,14 +95,9 @@ function Orders() {
             key: "email",
           },
           {
-            title: "Phone Number",
+            title: "Phone",
             dataIndex: "phone_number",
             key: "phone_number",
-          },
-          {
-            title: "Country Code",
-            dataIndex: "country_code",
-            key: "country_code",
           },
           {
             title: "Age",
@@ -107,7 +110,7 @@ function Orders() {
             key: "trekname",
           },
           {
-            title: "Number of People",
+            title: "People Count",
             dataIndex: "number_of_people",
             key: "number_of_people",
           },
@@ -118,10 +121,33 @@ function Orders() {
             render: (value) => <span>{new Date(value).toLocaleDateString()}</span>,
           },
           {
-            title: "Total Price",
+            title: "Track Price",
             dataIndex: "price",
             key: "price",
-            render: (value) => <span>₹{value}</span>,
+            render: (value) => <span>{formatPrice(value)}</span>,
+          },
+          {
+            title: "Amount Paid",
+            dataIndex: "amount_paid",
+            key: "amount_paid",
+            render: (value) => <span>{formatPrice(value)}</span>,
+          },
+          {
+            title: "Amount paid with charges",
+            dataIndex: "price_with_charges",
+            key: "price_with_charges",
+            render: (value) => <span>{formatPrice(value)}</span>,
+          },
+          {
+            title: "Remaining Amount",
+            dataIndex: "remaining_amount",
+            key: "remaining_amount",
+            render: (value) => <span>{formatPrice(value)}</span>,
+          },
+          {
+            title: "User ID",
+            dataIndex: "user_id",
+            key: "user_id",
           },
           {
             title: "Booking Date",
@@ -149,6 +175,9 @@ function Orders() {
         dataSource={dataSource.map((item) => ({ ...item, key: item.id }))}
         pagination={{
           pageSize: 5,
+          onChange: (page) => {
+            window.scrollTo(0, 0);
+          },
         }}
       />
     </div>

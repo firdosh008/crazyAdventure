@@ -40,15 +40,15 @@ const LoginPage = () => {
       });
 
       const data = await response.json();
-
-      console.log("Response data:", data);//asdasdasdasdihasdfhkasjlfhkjasdfhkjafh
+    console.log(data);
       if (!response.ok) {
         setErrorMessage(data.message || "Login failed. Please try again.");
       } else {
-        localStorage.setItem("auth_token", data.token);
-        localStorage.setItem("islogin", data.token?true:false);
+        // Store user data in localStorage
+        localStorage.setItem("userId", data.userId); // Make sure backend sends userId
         localStorage.setItem("name", data.username);
         localStorage.setItem("admin", data.isAdmin);
+        
         const message = data.isAdmin
           ? "Login successful as Admin!"
           : "Login successful!";
