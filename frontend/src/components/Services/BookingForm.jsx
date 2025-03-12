@@ -19,6 +19,8 @@ const BookingForm = ({ Trekname, price }) => {
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [paidAmount, setPaidAmount] = useState(0); // Add this new state
+  const [existingBookingId, setExistingBookingId] = useState(null); // To track existing booking
 
   // Simplified login check
   useEffect(() => {
@@ -32,14 +34,46 @@ const BookingForm = ({ Trekname, price }) => {
     }
   }, []);
 
-  // Calculate prices
+  // Modify the useEffect that fetches existing booking details
+  useEffect(() => {
+    if (userId && Trekname) {
+      fetch(`${URLS.backendUrl}/api/remaining-amount/${Trekname}/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.amount_paid > 0) {
+            console.log(data);
+            // Set payment related details
+            setPaidAmount(Number(data.amount_paid));
+            setExistingBookingId(data.id);
+            setRemainingAmount(basePrice - Number(data.amount_paid));
+
+            // Auto-fill other details from existing booking
+            setName(data.name || storedName);
+            setEmail(data.email || '');
+            setPhone(data.phone_number?.split(' ')[1] || ''); // Remove country code
+            setCountryCode(data.phone_number?.split(' ')[0] || '+91');
+            setAge(data.age || 0);
+            setNumberOfPeople(data.number_of_people || 1);
+            
+            // Set trek date if it exists
+            if (data.trek_date) {
+              setTrekDate(new Date(data.trek_date));
+            }
+            
+          }
+        })
+        .catch(err => console.log("No existing booking found"));
+    }
+  }, [userId, Trekname]);
+
+  // Update price calculation effect
   useEffect(() => {
     const basePriceValue = numberOfPeople * parseFloat(price.replace(/[^0-9.]/g, ""));
-    const charges = amountPaid * 0.05; // 5% GST
+    const charges = Number(amountPaid) * 0.05; // 5% GST
     setBasePrice(basePriceValue);
-    setPriceWithCharges(amountPaid + charges);
-    setRemainingAmount(basePriceValue - amountPaid);
-  }, [numberOfPeople, price, amountPaid]);
+    setPriceWithCharges(Number(amountPaid) + charges);
+    setRemainingAmount(basePriceValue - Number(paidAmount) - Number(amountPaid));
+  }, [numberOfPeople, price, amountPaid, paidAmount]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -65,6 +99,12 @@ const BookingForm = ({ Trekname, price }) => {
       return;
     }
 
+    // Check if trek is fully paid
+    if (remainingAmount <= 0) {
+      setError("This trek is already fully paid.");
+      return;
+    }
+
     // Prepare data to be sent to the API
     const bookingData = {
       name,
@@ -78,7 +118,8 @@ const BookingForm = ({ Trekname, price }) => {
       priceWithCharges,
       amountPaid,
       remainingAmount,
-      userId
+      userId,
+      existingBookingId // Add this to identify if it's an update
     };
     console.log(bookingData);
 
@@ -273,18 +314,31 @@ const BookingForm = ({ Trekname, price }) => {
           />
         </div>
 
-        {/* Price Details */}
+        {/* Show Previously Paid Amount if exists */}
+        {Number(paidAmount) > 0 && (
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold mb-1">Previously Paid Amount</label>
+            <input
+              type="text"
+              value={`₹${Number(paidAmount).toFixed(2)}`}
+              readOnly
+              className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
+            />
+          </div>
+        )}
+
+        {/* Track Price */}
         <div className="flex flex-col">
           <label className="text-sm font-semibold mb-1">Track Price</label>
           <input
             type="text"
-            value={`₹${basePrice.toFixed(2)}`}
+            value={`₹${Number(basePrice).toFixed(2)}`}
             readOnly
             className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
           />
         </div>
 
-
+        {/* Paying Amount - Update max value based on remaining */}
         <div className="flex flex-col">
           <label className="text-sm font-semibold mb-1">Paying Amount</label>
           <input
@@ -292,7 +346,7 @@ const BookingForm = ({ Trekname, price }) => {
             value={amountPaid}
             onChange={(e) => setAmountPaid(Number(e.target.value))}
             min="1000"
-            max={priceWithCharges}
+            max={basePrice - Number(paidAmount)}
             className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full"
           />
         </div>
@@ -301,21 +355,24 @@ const BookingForm = ({ Trekname, price }) => {
           <label className="text-sm font-semibold mb-1">Paying Amount with GST</label>
           <input
             type="text"
-            value={`₹${priceWithCharges.toFixed(2)}`}
+            value={`₹${Number(priceWithCharges).toFixed(2)}`}
             readOnly
             className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
           />
         </div>
 
-        <div className="flex flex-col">
-          <label className="text-sm font-semibold mb-1">Remaining Amount</label>
-          <input
-            type="text"
-            value={`₹${remainingAmount.toFixed(2)}`}
-            readOnly
-            className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
-          />
-        </div>
+        {/* Show Remaining Amount only if greater than 0 */}
+        {Number(remainingAmount) > 0 && (
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold mb-1">Remaining Amount</label>
+            <input
+              type="text"
+              value={`₹${Number(remainingAmount).toFixed(2)}`}
+              readOnly
+              className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
+            />
+          </div>
+        )}
 
         <button
           type="submit"

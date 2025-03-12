@@ -13,11 +13,12 @@ router.post("/book", (req, res) => {
     trekDate, 
     numberOfPeople, 
     Trekname, 
-    price,              // base price (track price)
-    priceWithCharges,   // amount with GST
-    amountPaid,         // paying amount
-    remainingAmount,    // remaining amount
-    userId 
+    price,              
+    priceWithCharges,   
+    amountPaid,         
+    remainingAmount,    
+    userId,
+    existingBookingId
   } = req.body;
 
   // Validate user is logged in
@@ -25,18 +26,44 @@ router.post("/book", (req, res) => {
     return res.status(401).json({ message: "User must be logged in to book" });
   }
 
-  // Check if there's an existing booking
-  const checkExisting = `
-    SELECT SUM(amount_paid) as total_paid
-    FROM bookings 
-    WHERE trekname = ? AND user_id = ?
-  `;
+  // If existingBookingId exists, update the booking
+  if (existingBookingId) {
+    const updateQuery = `
+      UPDATE bookings 
+      SET 
+        amount_paid = amount_paid + ?,
+        price_with_charges = price_with_charges + ?,
+        remaining_amount = ?,
+        trek_date = ?,
+        number_of_people = ?
+      WHERE id = ? AND user_id = ?
+    `;
 
-  db.query(checkExisting, [Trekname, userId], (error, results) => {
-    if (error) {
-      return res.status(500).json({ message: "Error checking existing booking" });
-    }
-
+    db.query(
+      updateQuery,
+      [
+        amountPaid, 
+        priceWithCharges, 
+        remainingAmount, 
+        trekDate,
+        numberOfPeople,
+        existingBookingId, 
+        userId
+      ],
+      (error, results) => {
+        if (error) {
+          console.error("Error updating booking:", error);
+          return res.status(500).json({ message: "Failed to update booking" });
+        }
+        res.status(200).json({ 
+          message: "Booking updated successfully", 
+          bookingId: existingBookingId,
+          remainingAmount
+        });
+      }
+    );
+  } else {
+    // For new booking
     const query = `
       INSERT INTO bookings (
         name, email, phone_number, age, trek_date, 
@@ -65,7 +92,7 @@ router.post("/book", (req, res) => {
         });
       }
     );
-  });
+  }
 });
 
 // 2. API to Fetch All Bookings
@@ -77,12 +104,12 @@ router.get("/bookings", (req, res) => {
       email,
       phone_number,
       age,
-      trekname,
-      number_of_people,
       trek_date,
+      number_of_people,
+      trekname,
       price,
-      amount_paid,
       price_with_charges,
+      amount_paid,
       remaining_amount,
       user_id,
       booking_date
@@ -124,10 +151,19 @@ router.get("/remaining-amount/:trekName/:userId", (req, res) => {
 
   const query = `
     SELECT 
+      id,
+      name,
+      email,
+      phone_number,
+      age,
+      trek_date,
+      number_of_people,
+      trekname,
       price,
       price_with_charges,
       amount_paid,
-      remaining_amount
+      remaining_amount,
+      user_id
     FROM bookings 
     WHERE trekname = ? AND user_id = ?
     ORDER BY booking_date DESC
