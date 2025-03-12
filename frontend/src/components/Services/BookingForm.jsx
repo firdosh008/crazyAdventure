@@ -100,29 +100,13 @@ const BookingForm = ({ Trekname, price }) => {
       return;
     }
 
-    if (amountPaid < 1000) {
-      setError("Minimum booking amount is ₹1000");
-      return;
-    }
-
-    if (amountPaid > priceWithCharges) {
-      setError("Payment amount cannot be greater than total amount");
-      return;
-    }
-
     // Validate required fields
     if (!name || !phone || !email || !age || !trekDate || !numberOfPeople) {
       setError("Please fill all the required fields.");
       return;
     }
 
-    // Check if trek is fully paid
-    if (remainingAmount <= 0) {
-      setError("This trek is already fully paid.");
-      return;
-    }
-
-    // Prepare data to be sent to the API
+    // Prepare data to be sent to the API with amountPaid set to 0
     const bookingData = {
       name,
       email,
@@ -132,11 +116,11 @@ const BookingForm = ({ Trekname, price }) => {
       numberOfPeople: parseInt(numberOfPeople),
       Trekname,
       price: basePrice,
-      priceWithCharges,
-      amountPaid,
-      remainingAmount,
+      priceWithCharges:0,
+      amountPaid: 0, // Initially set to 0
+      remainingAmount: basePrice, // Initially set to base price
       userId,
-      existingBookingId // Add this to identify if it's an update
+      existingBookingId
     };
     console.log(bookingData);
 
@@ -153,11 +137,9 @@ const BookingForm = ({ Trekname, price }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        
         console.log(data);
         if (data.message === "Booking saved successfully") {
           initiatePayment(data.bookingId);
-          
         } else {
           setError("Booking failed. Please try again.");
         }
@@ -188,15 +170,7 @@ const BookingForm = ({ Trekname, price }) => {
       const data = await response.json();
       console.log(data);
       if (data.paymentUrl) {
-          setName("");
-          setPhone("");
-          setEmail("");
-          setAge(0);
-          setCountryCode("+91");
-          setTrekDate(new Date());
-          setNumberOfPeople(1);
-          window.location.href = data.paymentUrl;
-          alert("Booking successful!");
+        window.location.href = data.paymentUrl;
       } else {
         setError("Failed to initiate payment. Try again.");
       }
@@ -204,6 +178,27 @@ const BookingForm = ({ Trekname, price }) => {
       setError("Payment error. Please try again.");
     }
     setLoading(false);
+  };
+
+  // Call this function after payment success
+  const handlePaymentSuccess = async (bookingId, amountPaid) => {
+    try {
+      const amountPaidWithCharges = amountPaid * 1.05; // Assuming 5% GST
+      const response = await fetch(`${URLS.backendUrl}/api/update-booking-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, amountPaid, amountPaidWithCharges }),
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.message === "Booking payment updated successfully") {
+        alert("Payment successful and booking updated!");
+      } else {
+        setError("Failed to update booking after payment.");
+      }
+    } catch (err) {
+      setError("Error updating booking after payment.");
+    }
   };
 
   // Add coupon verification function
@@ -214,7 +209,7 @@ const BookingForm = ({ Trekname, price }) => {
     }
 
     // Check if the coupon has already been applied
-    if (remainingAmount < (basePrice - paidAmount)) {
+    if (remainingAmount+amountPaid < (basePrice - paidAmount)) {
       setCouponError("Coupon has already been applied.");
       return;
     }

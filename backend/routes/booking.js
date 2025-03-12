@@ -183,4 +183,26 @@ router.get("/remaining-amount/:trekName/:userId", (req, res) => {
   });
 });
 
+// Add a new route to update booking after payment
+router.post("/update-booking-payment", (req, res) => {
+  const { bookingId, amountPaid, amountPaidWithCharges } = req.body;
+
+  const query = `
+    UPDATE bookings 
+    SET 
+      amount_paid = ?,
+      amount_paid_with_charges = ?,
+      remaining_amount = remaining_amount - ?
+    WHERE id = ?
+  `;
+
+  db.query(query, [amountPaid, amountPaidWithCharges, amountPaid, bookingId], (error, results) => {
+    if (error) {
+      console.error("Error updating booking payment:", error);
+      return res.status(500).json({ message: "Failed to update booking payment" });
+    }
+    res.status(200).json({ message: "Booking payment updated successfully" });
+  });
+});
+
 export default router;
