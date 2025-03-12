@@ -308,6 +308,85 @@ app.get("/api/auth/logout", (req, res) => {
   });
 });
 
+// Coupon APIs
+app.post('/api/coupons/verify', (req, res) => {
+  const { code, amount } = req.body;
+  
+  const query = 'SELECT * FROM coupons WHERE coupon_code = ?';
+  db.query(query, [code], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Invalid coupon code' });
+    }
+
+    const coupon = results[0];
+    if (amount < coupon.minimum_amount) {
+      return res.status(400).json({ 
+        error: `Minimum amount required is ₹${coupon.minimum_amount}` 
+      });
+    }
+
+    res.json({
+      valid: true,
+      discount_percentage: coupon.discount_percentage
+    });
+  });
+});
+
+// Add new coupon
+app.post('/api/coupons', (req, res) => {
+  const { coupon_code, discount_percentage, minimum_amount } = req.body;
+  
+  const query = 'INSERT INTO coupons (coupon_code, discount_percentage, minimum_amount) VALUES (?, ?, ?)';
+  db.query(query, [coupon_code, discount_percentage, minimum_amount], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to add coupon' });
+    }
+    res.json({ message: 'Coupon added successfully', id: result.insertId });
+  });
+});
+
+// Get all coupons
+app.get('/api/coupons', (req, res) => {
+  const query = 'SELECT * FROM coupons';
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to fetch coupons' });
+    }
+    res.json(results);
+  });
+});
+
+// Update coupon
+app.put('/api/coupons/:id', (req, res) => {
+  const { id } = req.params;
+  const { coupon_code, discount_percentage, minimum_amount } = req.body;
+  
+  const query = 'UPDATE coupons SET coupon_code = ?, discount_percentage = ?, minimum_amount = ? WHERE id = ?';
+  db.query(query, [coupon_code, discount_percentage, minimum_amount, id], (err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to update coupon' });
+    }
+    res.json({ message: 'Coupon updated successfully' });
+  });
+});
+
+// Delete coupon
+app.delete('/api/coupons/:id', (req, res) => {
+  const { id } = req.params;
+  
+  const query = 'DELETE FROM coupons WHERE id = ?';
+  db.query(query, [id], (err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to delete coupon' });
+    }
+    res.json({ message: 'Coupon deleted successfully' });
+  });
+});
+
 // Start the server
 const PORT = process.env.Port || 80 ;
 app.listen(PORT, () => {

@@ -21,6 +21,11 @@ const BookingForm = ({ Trekname, price }) => {
   const [error, setError] = useState("");
   const [paidAmount, setPaidAmount] = useState(0); // Add this new state
   const [existingBookingId, setExistingBookingId] = useState(null); // To track existing booking
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponError, setCouponError] = useState("");
+  const [discountedPrice, setDiscountedPrice] = useState(0);
+  const [isCouponApplied, setIsCouponApplied] = useState(false);
 
   // Simplified login check
   useEffect(() => {
@@ -45,9 +50,8 @@ const BookingForm = ({ Trekname, price }) => {
             // Set payment related details
             setPaidAmount(Number(data.amount_paid));
             setExistingBookingId(data.id);
-            setRemainingAmount(basePrice - Number(data.amount_paid));
-
             // Auto-fill other details from existing booking
+            setRemainingAmount(data.remaining_amount);
             setName(data.name || storedName);
             setEmail(data.email || '');
             setPhone(data.phone_number?.split(' ')[1] || ''); // Remove country code
@@ -69,11 +73,24 @@ const BookingForm = ({ Trekname, price }) => {
   // Update price calculation effect
   useEffect(() => {
     const basePriceValue = numberOfPeople * parseFloat(price.replace(/[^0-9.]/g, ""));
-    const charges = Number(amountPaid) * 0.05; // 5% GST
     setBasePrice(basePriceValue);
+    
+    // Calculate discounted price if coupon is applied
+    const discountAmount = isCouponApplied ? (basePriceValue * couponDiscount / 100) : 0;
+    const priceAfterDiscount = basePriceValue - discountAmount;
+    setDiscountedPrice(priceAfterDiscount);
+    
+    const charges = Number(amountPaid) * 0.05; // 5% GST
     setPriceWithCharges(Number(amountPaid) + charges);
-    setRemainingAmount(basePriceValue - Number(paidAmount) - Number(amountPaid));
-  }, [numberOfPeople, price, amountPaid, paidAmount]);
+    // Determine remaining amount based on whether it's a new booking or partial payment
+    if (existingBookingId) {
+      // Partial payment
+      setRemainingAmount((prev) => prev - Number(amountPaid));
+    } else {
+      // New booking
+      setRemainingAmount(priceAfterDiscount - Number(paidAmount) - Number(amountPaid));
+    }
+  }, [numberOfPeople, price, amountPaid, paidAmount, couponDiscount, isCouponApplied, existingBookingId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -188,6 +205,77 @@ const BookingForm = ({ Trekname, price }) => {
     }
     setLoading(false);
   };
+
+  // Add coupon verification function
+  const handleApplyCoupon = async () => {
+    if (!couponCode) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+
+    // Check if the coupon has already been applied
+    if (remainingAmount < (basePrice - paidAmount)) {
+      setCouponError("Coupon has already been applied.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${URLS.backendUrl}/api/coupons/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: couponCode,
+          amount: basePrice
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setCouponError(data.error);
+        setIsCouponApplied(false);
+        setCouponDiscount(0);
+        return;
+      }
+
+      setCouponDiscount(data.discount_percentage);
+      setIsCouponApplied(true);
+      setCouponError("");
+    } catch (error) {
+      setCouponError("Failed to verify coupon");
+    }
+  };
+
+  // Add this JSX block after the Trek Date input and before the Previously Paid Amount
+  const couponSection = (
+    <div className="flex flex-col">
+      <label className="text-sm font-semibold mb-1">Coupon Code</label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={couponCode}
+          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+          className="border-gray-300 border-[1px] rounded-lg px-3 py-2 flex-1"
+          placeholder="Enter coupon code"
+        />
+        <button
+          type="button"
+          onClick={handleApplyCoupon}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+        >
+          Apply
+        </button>
+      </div>
+      {couponError && <p className="text-red-500 text-sm mt-1">{couponError}</p>}
+      {isCouponApplied && (
+        <p className="text-green-500 text-sm mt-1">
+          Coupon applied! {couponDiscount}% discount
+        </p>
+      )}
+    </div>
+  );
 
   return (
     <div
@@ -314,6 +402,9 @@ const BookingForm = ({ Trekname, price }) => {
           />
         </div>
 
+        {/* Add this after the Trek Date DatePicker component */}
+        {couponSection}
+
         {/* Show Previously Paid Amount if exists */}
         {Number(paidAmount) > 0 && (
           <div className="flex flex-col">
@@ -337,6 +428,19 @@ const BookingForm = ({ Trekname, price }) => {
             className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
           />
         </div>
+
+        {/* Discounted Price */}
+        {isCouponApplied && (
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold mb-1">Discounted Price</label>
+            <input
+              type="text"
+              value={`₹${Number(discountedPrice).toFixed(2)}`}
+              readOnly
+              className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
+            />
+          </div>
+        )}
 
         {/* Paying Amount - Update max value based on remaining */}
         <div className="flex flex-col">
@@ -362,7 +466,7 @@ const BookingForm = ({ Trekname, price }) => {
         </div>
 
         {/* Show Remaining Amount only if greater than 0 */}
-        {Number(remainingAmount) > 0 && (
+        
           <div className="flex flex-col">
             <label className="text-sm font-semibold mb-1">Remaining Amount</label>
             <input
@@ -372,8 +476,6 @@ const BookingForm = ({ Trekname, price }) => {
               className="border-gray-300 border-[1px] rounded-lg px-3 py-2 w-full bg-gray-200 cursor-not-allowed"
             />
           </div>
-        )}
-
         <button
           type="submit"
           className="w-full bg-lemonYellow hover:bg-yellow-500 text-black hover:text-white font-semibold py-2 rounded-lg transition-colors"
